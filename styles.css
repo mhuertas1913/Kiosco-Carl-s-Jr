@@ -24,6 +24,11 @@
   --topbar-h: 78px;
   --catnav-h: 64px;
   --catnav-w: 92px;
+  /* Hueco que hay que dejar libre al final de las zonas con scroll: el
+     botón flotante "Mi pedido" va superpuesto y, sin esta reserva, el
+     último producto (o el banner de upselling) se queda debajo y no se
+     puede leer ni tocar. Medido: 74px en móvil y 92px en el tótem. */
+  --fab-space: 84px;
 }
 
 html { font-size: 16px; scroll-behavior: smooth; }
@@ -339,6 +344,11 @@ a { -webkit-tap-highlight-color: transparent; }
   overflow-y: auto; -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: thin; scrollbar-color: var(--dark3) transparent;
+  /* El scroll llega un poco más abajo del contenido para que lo último
+     (última fila de productos, banner de upselling, resultados del quiz)
+     suba por encima del botón "Mi pedido" en vez de quedarse tapado. */
+  padding-bottom: var(--fab-space);
+  scroll-padding-bottom: var(--fab-space);
 }
 .view { display: none; }
 .view.active { display: block; }
@@ -1256,6 +1266,7 @@ a { -webkit-tap-highlight-color: transparent; }
   font-weight: 700; font-size: .75rem; text-transform: uppercase;
   letter-spacing: .1em; color: var(--mid); margin-bottom: 10px;
 }
+.os-dining { font-weight: 700; color: var(--yellow); margin-bottom: 10px; }
 .os-items { display: flex; flex-direction: column; gap: 6px; }
 .os-line {
   display: flex; justify-content: space-between;
@@ -1370,13 +1381,19 @@ input, select, textarea {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-/* Centering for both showModal() and show() fallback */
+/* Centrado válido para showModal() y para el show() de respaldo.
+   Antes era top:50% + translate(-50%,-50%). Eso rompía en cuanto el
+   contenido crecía: el navegador le pone bottom:0 a los diálogos modales,
+   así que con margin:auto (lo que hace .combo-dialog) los márgenes
+   automáticos salían NEGATIVOS y el diálogo se salía por arriba de la
+   pantalla — cortado justo en el paso de elegir bebida/acompañamiento.
+   inset:0 + margin:auto centra bien a cualquier tamaño y deja que el
+   propio diálogo haga scroll interno cuando no cabe. */
 dialog {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
+  inset: 0;
+  margin: auto;
+  transform: none;
   max-height: 90vh;
   max-height: 90dvh;
   overflow-y: auto;
@@ -1631,3 +1648,323 @@ dialog[open] {
     text-shadow: none;
   }
 }
+
+/* ─── COMER AQUÍ / PARA LLEVAR (chip topbar) ─── */
+.dining-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,.55); border: 1.5px solid var(--red);
+  border-radius: 999px; padding: 6px 14px;
+  font-size: .8rem; color: var(--white); font-weight: 700;
+  transition: transform .15s, border-color .15s;
+}
+.dining-chip:hover { border-color: var(--yellow); }
+.dining-chip:active { transform: scale(.95); }
+.dining-chip.togo { border-color: var(--yellow); }
+
+/* ─── ELECCIÓN GRANDE (comer aquí/llevar, individual/combo) ─── */
+.choice-content .combo-body { gap: 14px; }
+.choice-options-lg { gap: 14px; }
+.choice-options-lg .combo-opt {
+  flex: 1 1 45%;
+  flex-direction: column; justify-content: center;
+  padding: 26px 18px; gap: 10px;
+  text-align: center; font-size: 1rem;
+}
+.choice-options-lg .combo-opt-icon { font-size: 2.6rem; }
+.choice-options-lg .combo-opt-label { font-size: 1.05rem; }
+.choice-options-lg .combo-opt-price { font-size: .82rem; }
+
+@media (min-width: 900px) {
+  .choice-options-lg .combo-opt { padding: 40px 26px; }
+  .choice-options-lg .combo-opt-icon { font-size: 4rem; }
+  .choice-options-lg .combo-opt-label { font-size: 1.8rem; }
+  .choice-options-lg .combo-opt-price { font-size: 1.2rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PANTALLAS MÁS BAJAS QUE EL TÓTEM (portátiles, tablets, monitores)
+   ───────────────────────────────────────────────────────────────
+   Todo el bloque de kiosko está dimensionado en píxeles para los
+   1080x1920 del tótem (héroes de 430px, títulos de 2.8rem...). En una
+   pantalla de 768 o 1080 de alto eso no cabe y obliga a hacer scroll
+   dentro de cada diálogo. Aquí se reescalan esas medidas con clamp()
+   sobre vh: el tótem (>1500px de alto) se queda exactamente igual y el
+   resto de resoluciones se ajustan de forma continua.
+   ═══════════════════════════════════════════════════════════════ */
+@media (min-width: 900px) and (max-height: 1500px) {
+  /* Cabecera con la foto del producto: es lo que más altura come */
+  .pd-hero, .combo-hero { height: clamp(120px, 21vh, 430px); }
+
+  /* Textos del configurador */
+  .combo-name, .pd-name, .pd-title { font-size: clamp(1.15rem, 2.7vh, 2.8rem); }
+  .combo-desc { font-size: clamp(.8rem, 1.5vh, 1.5rem); }
+  .pd-desc { font-size: clamp(.8rem, 1.5vh, 1.1rem); }
+  .combo-section h3 { font-size: clamp(.85rem, 1.8vh, 2rem); margin-bottom: clamp(8px, 1.4vh, 22px); }
+  .combo-body, .pd-body { padding: 0 clamp(20px, 6vw, 120px) clamp(10px, 1.6vh, 24px); gap: clamp(10px, 1.8vh, 20px); }
+  .pd-footer { padding: 0 clamp(20px, 6vw, 120px) clamp(14px, 2.4vh, 35px); }
+
+  /* Opciones (bebida, acompañamiento, postre) */
+  .combo-options { gap: clamp(8px, 1.2vh, 16px); }
+  .combo-opt { padding: clamp(8px, 1.3vh, 22px) clamp(12px, 1.4vw, 26px); gap: clamp(10px, 1.4vw, 18px); }
+  .combo-opt img { width: clamp(42px, 7.5vh, 92px); height: clamp(42px, 7.5vh, 92px); }
+  .combo-opt-icon { font-size: clamp(1.4rem, 3vh, 3rem); }
+  .combo-opt-label { font-size: clamp(.85rem, 1.7vh, 1.7rem); }
+  .combo-opt-price { font-size: clamp(.72rem, 1.35vh, 1.4rem); }
+
+  /* Elección grande: individual/combo, aquí/llevar, recoger/mesa */
+  .choice-options-lg .combo-opt { padding: clamp(14px, 2.6vh, 40px) clamp(14px, 1.6vw, 26px); }
+  .choice-options-lg .combo-opt-icon { font-size: clamp(1.8rem, 4vh, 4rem); }
+  .choice-options-lg .combo-opt-label { font-size: clamp(.95rem, 2vh, 1.8rem); }
+  .choice-options-lg .combo-opt-price { font-size: clamp(.75rem, 1.4vh, 1.2rem); }
+
+  /* Personalización de la burger */
+  .combo-mods { gap: clamp(8px, 1.2vh, 16px); }
+  .combo-mod { padding: clamp(8px, 1.4vh, 20px) clamp(14px, 1.6vw, 28px); font-size: clamp(.8rem, 1.7vh, 1.75rem); gap: clamp(8px, 1.2vw, 16px); }
+  .combo-mod-img { width: clamp(34px, 6.5vh, 80px); height: clamp(34px, 6.5vh, 80px); }
+
+  /* Pie del configurador */
+  .combo-total-label { font-size: clamp(.8rem, 1.5vh, 1.55rem); }
+  .combo-total-price { font-size: clamp(1.2rem, 2.6vh, 2.6rem); }
+  .combo-step-dot { width: clamp(8px, 1.2vh, 16px); height: clamp(8px, 1.2vh, 16px); }
+  .combo-step-nav .combo-step-back { font-size: clamp(.85rem, 1.6vh, 1.6rem); padding: 0 clamp(16px, 2.4vw, 40px); }
+  .btn-add-cart { font-size: clamp(1rem, 2vh, 1.8rem); padding: clamp(12px, 1.8vh, 22px); }
+  .pd-qty-row { margin: clamp(10px, 1.8vh, 28px) 0; }
+  .pd-qty-btn { width: clamp(34px, 5vh, 46px); height: clamp(34px, 5vh, 46px); font-size: clamp(1.1rem, 2.2vh, 1.7rem); }
+  .pd-qty-label { font-size: clamp(.85rem, 1.5vh, 1.55rem); }
+  .pd-qty-val { font-size: clamp(1rem, 2vh, 2.1rem); min-width: clamp(34px, 4vw, 52px); }
+
+  /* Rail de categorías: 8 pestañas de 81px no caben en pantallas bajas */
+  .cat-nav { gap: clamp(4px, 1vh, 29px); }
+  .cat-tab, .cat-nav-ai, .cat-nav-a11y { min-height: clamp(46px, 8vh, 86px); height: auto; }
+  .cat-tab .cat-icon { font-size: clamp(1.1rem, 2.4vh, 2rem); }
+  .cat-tab, .cat-nav-ai { font-size: clamp(.6rem, 1.2vh, .85rem); }
+  .cat-nav-ai-sparkle { font-size: clamp(1.1rem, 2.4vh, 1.9rem); }
+  .cat-nav-a11y-icon { font-size: clamp(1.1rem, 2.4vh, 2.1rem); }
+
+  /* Rejilla de productos: columnas fijas de 272px desbordaban a lo ancho */
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 272px));
+    gap: clamp(16px, 2.4vh, 46px) clamp(16px, 2.4vw, 52px);
+    padding: clamp(16px, 3vh, 80px) 20px clamp(12px, 2vh, 28px);
+  }
+  .pc-name { font-size: clamp(.95rem, 1.9vh, 1.42rem); }
+  .pc-desc { min-height: 0; font-size: clamp(.72rem, 1.35vh, .95rem); }
+  .pc-price { font-size: clamp(1.2rem, 2.4vh, 2rem); }
+  .pc-add { width: clamp(34px, 5vh, 45px); height: clamp(34px, 5vh, 45px); font-size: clamp(1.4rem, 3vh, 2.2rem); }
+
+  /* Carrito */
+  .cart-panel { padding: clamp(16px, 2.6vh, 34px) clamp(20px, 3vw, 56px) clamp(18px, 2.6vh, 40px); }
+  .cart-title { font-size: clamp(1.2rem, 2.6vh, 2.5rem); }
+  .cart-close { width: clamp(36px, 5vh, 52px); height: clamp(36px, 5vh, 52px); font-size: clamp(1rem, 2vh, 2rem); }
+  .cart-line { padding: clamp(10px, 1.6vh, 24px) 0; }
+  .cl-name { font-size: clamp(.9rem, 1.8vh, 1.95rem); }
+  .cl-mods { font-size: clamp(.7rem, 1.3vh, 1.3rem); }
+  .cl-price { font-size: clamp(1.05rem, 2.2vh, 2.4rem); }
+  .cl-img, .cl-emoji, .cart-item-img { width: clamp(48px, 8vh, 112px); height: clamp(48px, 8vh, 112px); }
+  .cl-qty { gap: clamp(8px, 1.4vw, 18px); margin-top: clamp(6px, 1.2vh, 16px); }
+  .cl-qty-btn { width: clamp(34px, 5vh, 58px); height: clamp(34px, 5vh, 58px); font-size: clamp(1rem, 2vh, 1.9rem); }
+  .cl-qty-val { font-size: clamp(.9rem, 1.7vh, 1.8rem); }
+  .ct-row { font-size: clamp(.8rem, 1.5vh, 1.6rem); }
+  .ct-row.total { font-size: clamp(1.05rem, 2.2vh, 2.4rem); }
+  .btn-checkout { font-size: clamp(1rem, 2.1vh, 1.9rem); padding: clamp(12px, 1.8vh, 20px); margin-top: clamp(10px, 1.8vh, 22px); }
+
+  /* Upselling */
+  .cart-upsell { padding: clamp(12px, 1.8vh, 26px); }
+  .cu-title { font-size: clamp(.85rem, 1.6vh, 1.7rem); margin-bottom: clamp(8px, 1.4vh, 20px); }
+  .cu-item { padding: clamp(9px, 1.4vh, 20px) clamp(12px, 1.4vw, 24px); gap: clamp(10px, 1.4vw, 20px); }
+  .cu-item img { width: clamp(40px, 6.5vh, 84px); height: clamp(40px, 6.5vh, 84px); }
+  .cu-item-name { font-size: clamp(.82rem, 1.6vh, 1.7rem); }
+  .cu-item-price { font-size: clamp(.72rem, 1.35vh, 1.4rem); }
+  .cu-item-add { font-size: clamp(1.3rem, 2.6vh, 2.8rem); }
+
+  /* Pago y resguardo */
+  .checkout-wrap { padding: clamp(18px, 3vh, 56px) clamp(20px, 3vw, 52px); }
+  .checkout-payment h2, .checkout-success h2 { font-size: clamp(1.2rem, 2.8vh, 3rem); }
+  .payment-grid { gap: clamp(10px, 1.6vh, 20px); margin: clamp(12px, 2.4vh, 34px) 0; }
+  .pay-method { padding: clamp(12px, 2.2vh, 34px) clamp(12px, 1.6vw, 20px); gap: clamp(8px, 1.4vh, 18px); }
+  .pay-method .pay-icon { height: clamp(28px, 4.6vh, 56px); }
+  .pay-method .pay-emoji { font-size: clamp(1.5rem, 3.2vh, 3.2rem); }
+  .pay-method .pay-label { font-size: clamp(.78rem, 1.5vh, 1.55rem); }
+  .pay-hint { font-size: clamp(.75rem, 1.4vh, 1.35rem); padding: clamp(10px, 1.6vh, 20px) clamp(14px, 1.8vw, 26px); }
+  .btn-secondary { font-size: clamp(.85rem, 1.6vh, 1.5rem); padding: clamp(12px, 1.8vh, 22px); margin-top: clamp(8px, 1.4vh, 18px); }
+  .btn-print-ticket { font-size: clamp(.85rem, 1.6vh, 1.5rem); padding: clamp(12px, 1.8vh, 22px) clamp(14px, 1.8vw, 26px); margin: clamp(8px, 1.4vh, 18px) 0 clamp(12px, 1.8vh, 26px); }
+  .order-summary { font-size: clamp(.78rem, 1.4vh, 1.25rem); padding: clamp(12px, 1.8vh, 24px) clamp(14px, 1.8vw, 26px); }
+  .success-anim { font-size: clamp(2rem, 5vh, 4rem); }
+  .order-id { font-size: clamp(1.8rem, 4.5vh, 4rem); }
+  .countdown-ring { width: clamp(46px, 7vh, 78px); height: clamp(46px, 7vh, 78px); }
+
+  /* Quiz */
+  .quiz-wrap { padding: clamp(16px, 3vh, 40px) clamp(18px, 3vw, 34px) clamp(74px, 9vh, 118px); }
+  .quiz-option { min-height: clamp(88px, 15vh, 250px); gap: clamp(8px, 1.6vh, 22px); padding: clamp(10px, 2vh, 30px) 20px; }
+  .quiz-option-img { width: clamp(52px, 9vh, 130px); height: clamp(52px, 9vh, 130px); }
+  .quiz-option-icon { font-size: clamp(1.8rem, 4.4vh, 4.5rem); }
+  .quiz-option-label { font-size: clamp(.85rem, 1.7vh, 1.6rem); }
+  .quiz-q-title { font-size: clamp(1.1rem, 2.6vh, 2.6rem); }
+
+  /* Selector de bebida dentro del modal de producto */
+  .pd-variant-section .combo-opt { min-width: 0; padding: clamp(10px, 1.6vh, 20px) clamp(14px, 1.8vw, 26px); }
+  .pd-variant-section .combo-opt img { width: clamp(38px, 6vh, 68px); height: clamp(38px, 6vh, 68px); }
+  .pd-variant-section .combo-opt-label { font-size: clamp(.85rem, 1.6vh, 1.5rem); }
+}
+
+/* El hueco para el botón "Mi pedido" lo reserva ahora .main, así que los
+   rellenos inferiores gigantes del bloque de kiosko (116-118px) sobran y
+   dejarían un vacío del doble al final de la página. */
+@media (min-width: 900px) {
+  :root { --fab-space: 96px; }
+  .product-grid { padding-bottom: clamp(12px, 2vh, 28px); }
+  .quiz-wrap { padding-bottom: clamp(12px, 2vh, 28px); }
+}
+
+/* Móviles y ventanas pequeñas: la foto de cabecera se comía media ventana
+   y dejaba las opciones fuera de vista. */
+@media (max-width: 899px) {
+  .pd-hero { height: clamp(130px, 25vh, 300px); }
+  .combo-hero { height: clamp(110px, 21vh, 240px); }
+  .combo-body, .pd-body { padding: 16px; gap: 14px; }
+}
+
+/* El carrito del tótem se ancla a 140px del borde y mide 1520px: en una
+   pantalla baja eso lo dejaba en una franja diminuta. */
+@media (min-width: 900px) and (max-height: 1500px) {
+  .cart-panel {
+    top: clamp(12px, 4vh, 140px);
+    height: auto;
+    max-height: calc(100dvh - clamp(24px, 8vh, 280px));
+  }
+}
+
+/* ─── NÚMERO DE MESA (teclado del kiosco) ─── */
+.table-num {
+  width: min(240px, 70%); margin: 14px auto;
+  text-align: center; font-family: var(--font-head);
+  font-size: 3rem; line-height: 1.1; letter-spacing: .12em; color: var(--yellow);
+  background: #101010; border: 2px solid var(--dark3); border-radius: var(--radius);
+  padding: 6px 0;
+}
+.keypad {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  max-width: 330px; margin: 0 auto;
+}
+.keypad-key {
+  background: var(--dark3); color: var(--white);
+  border: 1.5px solid #55565a; border-radius: var(--radius-sm);
+  padding: 16px 0; font-family: var(--font-head); font-size: 1.6rem; font-weight: 800;
+  transition: background .12s, transform .1s;
+}
+.keypad-key:active { transform: scale(.95); background: var(--red); }
+.keypad-del { color: var(--yellow); font-size: 1.3rem; }
+
+/* Con clamp() el tótem conserva su tamaño (los máximos) y en pantallas
+   bajas el teclado se ajusta en vez de salirse. */
+@media (min-width: 900px) {
+  .table-num {
+    width: min(360px, 80%); margin: clamp(6px, 1.4vh, 14px) auto;
+    font-size: clamp(2rem, 5vh, 5rem);
+  }
+  .keypad { max-width: clamp(300px, 46vh, 520px); gap: clamp(8px, 1.4vh, 16px); }
+  .keypad-key { padding: clamp(10px, 1.9vh, 26px) 0; font-size: clamp(1.2rem, 2.4vh, 2.4rem); }
+  .keypad-del { font-size: clamp(1rem, 2vh, 2rem); }
+}
+
+/* ─── ACCESIBILIDAD: MODO SILLA DE RUEDAS ───
+   Baja toda la interfaz táctil (menú, carrito y diálogos) a la mitad
+   inferior de la pantalla para que sea alcanzable desde una silla de
+   ruedas en el tótem vertical, sin tener que rediseñar cada vista. */
+/* Va en el rail lateral, pero anclado al fondo (margin-top:auto): en el
+   tótem vertical "Sorpréndeme" cae a media altura y ahí no llega alguien
+   sentado, que es justo lo que este botón resuelve. Al ir dentro del rail
+   tampoco se superpone al botón de pagar del checkout. */
+.cat-nav-a11y {
+  margin-top: auto;
+  gap: 5px;
+  /* Con el menú bajado el rail se comprime y las pestañas ya no caben:
+     pegado al fondo del rail sigue viéndose siempre, que es lo mínimo
+     exigible para poder volver a subir el menú. */
+  position: sticky; bottom: 0; z-index: 2;
+}
+.cat-nav-a11y-icon { font-size: 1.6rem; line-height: 1; }
+/* Tres clases para ganarle al :hover genérico de .cat-tab, que si no
+   apagaba el amarillo del estado activo. */
+.cat-tab.cat-nav-a11y.is-on {
+  background: var(--yellow); color: var(--black);
+  border-color: #fff3b0; text-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 0 14px rgba(255,200,44,.75);
+}
+/* Sin esto, "Sorpréndeme" y el botón de accesibilidad se reparten el hueco
+   libre del rail y quedan separados en vez de agrupados al final. */
+.cat-nav-ai { margin-top: 0; }
+
+@media (min-width: 900px) {
+  .cat-nav-a11y { min-height: 81px; height: auto; padding: 10px 5px; }
+  .cat-nav-a11y-icon { font-size: 2.1rem; }
+}
+
+body.a11y-lowered #app {
+  position: fixed; inset: auto 0 0 0;
+  height: 50vh; height: 50dvh;
+  box-shadow: 0 -22px 50px rgba(0,0,0,.85);
+}
+
+/* Telón de la mitad superior: madera de la casa + estrella de la marca,
+   en vez del negro plano que quedaba antes. */
+.a11y-backdrop { display: none; }
+body.a11y-lowered .a11y-backdrop {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: clamp(8px, 2vh, 26px);
+  position: fixed; left: 0; right: 0; top: 0;
+  height: 50vh; height: 50dvh;
+  z-index: 0; pointer-events: none; overflow: hidden;
+  background-color: #0b0b0c;
+  background-image:
+    radial-gradient(ellipse at 50% 62%, rgba(204,0,0,.34), transparent 62%),
+    url('./wood-bg.png');
+  background-size: auto, 220px 220px;
+  background-repeat: no-repeat, repeat;
+}
+.a11y-backdrop-star {
+  width: clamp(90px, 20vh, 260px); height: auto;
+  filter: drop-shadow(0 10px 26px rgba(0,0,0,.75)) drop-shadow(0 0 34px rgba(255,200,44,.34));
+  animation: a11y-star-float 6s ease-in-out infinite;
+}
+.a11y-backdrop-tag {
+  font-family: var(--font-head);
+  font-size: clamp(.85rem, 2.4vh, 2rem);
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--yellow); text-shadow: 0 2px 10px rgba(0,0,0,.9);
+  text-align: center; padding: 0 20px;
+}
+@keyframes a11y-star-float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-14px) rotate(3deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .a11y-backdrop-star { animation: none; }
+}
+
+body.a11y-lowered .product-dialog,
+body.a11y-lowered .combo-dialog,
+body.a11y-lowered .checkout-dialog,
+body.a11y-lowered .register-dialog {
+  top: 50vh; top: 50dvh;
+  max-height: 48vh; max-height: 48dvh;
+}
+
+body.a11y-lowered .cart-panel {
+  top: 50vh; top: 50dvh; bottom: 0; height: auto;
+  max-height: 48vh; max-height: 48dvh;
+  overflow-y: auto;
+}
+/* ≥900px el carrito se abre/cierra deslizando en vertical (translateY
+   relativo a su propia altura). Al bajarlo a la banda inferior esa altura
+   cambia, así que hay que recalcular también el estado cerrado o se queda
+   asomando por encima en vez de esconderse fuera de la pantalla. */
+@media (min-width: 900px) {
+  body.a11y-lowered .cart-panel { transform: translate(50%, 130%); }
+  body.a11y-lowered .cart-panel.open { transform: translate(50%, 0); }
+}
+/* La lista de artículos no debe aplastarse a 0 cuando el panel entero se
+   reduce a la banda inferior: si no cabe todo, que se desplace el panel
+   completo en vez de esconder la fila que se está editando. */
+body.a11y-lowered .cart-items { flex: 0 1 auto; min-height: 110px; }
