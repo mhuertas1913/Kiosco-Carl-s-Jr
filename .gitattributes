@@ -1,0 +1,5 @@
+# Los lanzadores del PC del kiosco los ejecuta Windows directamente, así que
+# tienen que llegar con saltos de línea CRLF pase lo que pase con la
+# configuración de git de quien clone el repositorio.
+*.bat text eol=crlf
+*.vbs text eol=crlf
