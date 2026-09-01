@@ -1043,6 +1043,18 @@
       return 'data:image/svg+xml,' + encodeURIComponent(svg);
     }
 
+    /* ── ETIQUETA COMER AQUÍ / PARA LLEVAR / MESA ──
+       Si el pedido se sirve en mesa, el número del cartelito es lo que
+       necesita quien lo lleva, así que se muestra en vez de "AQUÍ". */
+    function diningTag(order) {
+      const tag = (color, text) =>
+        `<span style="font-size:.68rem;font-weight:800;color:${color};margin-left:6px;white-space:nowrap">${text}</span>`;
+      if (order.table) return tag('#3B82F6', `🪑 MESA ${order.table}`);
+      if (order.dining === 'togo') return tag('#f59e0b', '🥡 LLEVAR');
+      if (order.dining === 'here') return tag('#22c55e', '🍽️ AQUÍ');
+      return '';
+    }
+
     /* ── DIFFICULTY ── */
     function calcDifficulty(order) {
       const totalQty = order.items.reduce((s, i) => s + (i.qty || 1), 0);
@@ -1261,7 +1273,7 @@
         card.className = 'd-card';
         card.innerHTML = `
           <div class="d-card-head">
-            <span class="d-card-id">#${order.id}</span>
+            <span class="d-card-id">#${order.id}${diningTag(order)}</span>
             <span class="d-card-time">${timeLabel}</span>
           </div>
           <div class="d-card-items">${itemSummary}</div>
@@ -1332,7 +1344,7 @@
         card.style.borderLeftColor = isActive ? '#3B82F6' : '';
         card.innerHTML = `
           <div class="q-card-head">
-            <span class="q-card-id">#${order.id}</span>
+            <span class="q-card-id">#${order.id}${diningTag(order)}</span>
             <span class="q-card-diff ${cfg.cls}">${cfg.label}</span>
           </div>
           <div class="q-card-items">${itemSummary}</div>
@@ -1487,7 +1499,7 @@
         <div class="active-card">
           <div class="active-details">
             <div class="active-order-header">
-              <div class="active-order-num">#${order.id}</div>
+              <div class="active-order-num">#${order.id}${diningTag(order)}</div>
               <div class="active-order-meta">
                 <span class="active-order-diff ${cfg.cls}">${cfg.label} · ${cfg.pts} pts base</span>
                 <span class="active-order-itemcount">${order.items.reduce((s,i)=>s+(i.qty||1),0)} producto(s)</span>

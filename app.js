@@ -494,6 +494,30 @@ const LANGS = {
     'mod-extra-cheese': 'Extra queso', 'mod-extra-bacon': 'Extra bacon',
     quizQuestion: (n, total) => `Pregunta ${n} de ${total}`,
     comingSoon: 'Próximamente en esta sección',
+    diningTitle: '¿Vas a comer aquí o te lo llevas?',
+    diningHere: 'Comer aquí', diningToGo: 'Para llevar',
+    diningHereShort: 'Aquí', diningToGoShort: 'Llevar',
+    a11yLower: 'Bajar menú', a11yRestore: 'Subir menú',
+    burgerTypeTitle: '¿Cómo la quieres?',
+    burgerTypeSub: 'Puedes personalizarla en el siguiente paso',
+    burgerSolo: 'Individual', burgerCombo: 'En combo',
+    burgerComboHint: '+ patatas y bebida',
+    comboItemName: (n) => `Menú ${n}`,
+    orderSummaryDining: (v) => v === 'togo' ? '🥡 Para llevar' : '🍽️ Para comer aquí',
+    ticketDiningHere: 'PARA TOMAR AQUÍ', ticketDiningToGo: 'PARA LLEVAR',
+    serviceTitle: '¿Cómo quieres recibir tu pedido?',
+    serviceSub: 'Tu pago ya está confirmado ✅',
+    servicePickup: 'Voy a recogerlo',
+    servicePickupHint: 'Te avisamos con tu número',
+    serviceTable: 'Que me lo lleven',
+    serviceTableHint: 'Servicio a tu mesa',
+    serviceTableAsk: 'Coge un cartelito con número junto al kiosco y escribe aquí ese número',
+    serviceConfirm: 'Confirmar mesa',
+    serviceConfirmHint: '🪑 Escribe el número de tu mesa',
+    summaryTable: (n) => `🪑 Te lo llevamos a la mesa ${n}`,
+    summaryPickup: '🛎️ Recógelo en el mostrador cuando salga tu número',
+    ticketTable: (n) => `MESA ${n}`,
+    ticketPickup: 'RECOGER EN MOSTRADOR',
   },
   en: {
     eyebrow: 'Bigger. Better. Burgers.',
@@ -576,6 +600,30 @@ const LANGS = {
     'mod-extra-cheese': 'Extra cheese', 'mod-extra-bacon': 'Extra bacon',
     quizQuestion: (n, total) => `Question ${n} of ${total}`,
     comingSoon: 'Coming soon in this section',
+    diningTitle: 'Are you dining in or taking out?',
+    diningHere: 'Dine in', diningToGo: 'Takeout',
+    diningHereShort: 'Dine in', diningToGoShort: 'Takeout',
+    a11yLower: 'Lower menu', a11yRestore: 'Raise menu',
+    burgerTypeTitle: 'How do you want it?',
+    burgerTypeSub: 'You can customize it in the next step',
+    burgerSolo: 'Solo', burgerCombo: 'Make it a combo',
+    burgerComboHint: '+ fries & drink',
+    comboItemName: (n) => `${n} Combo`,
+    orderSummaryDining: (v) => v === 'togo' ? '🥡 Takeout' : '🍽️ Dine in',
+    ticketDiningHere: 'EAT IN', ticketDiningToGo: 'TAKEOUT',
+    serviceTitle: 'How would you like to get your order?',
+    serviceSub: 'Your payment is confirmed ✅',
+    servicePickup: "I'll pick it up",
+    servicePickupHint: "We'll call your number",
+    serviceTable: 'Bring it to me',
+    serviceTableHint: 'Table service',
+    serviceTableAsk: 'Grab a numbered table marker next to the kiosk and type its number here',
+    serviceConfirm: 'Confirm table',
+    serviceConfirmHint: '🪑 Type your table number',
+    summaryTable: (n) => `🪑 We'll bring it to table ${n}`,
+    summaryPickup: '🛎️ Pick it up at the counter when your number is called',
+    ticketTable: (n) => `TABLE ${n}`,
+    ticketPickup: 'COUNTER PICKUP',
   }
 };
 
@@ -595,7 +643,10 @@ const state = {
   dcDone: false,
   isGuest: true,
   userName: '',
-  lang: 'es'
+  lang: 'es',
+  dining: 'here',
+  service: 'pickup',   // 'pickup' | 'table' (solo si se come en el local)
+  tableNumber: null
 };
 
 /* ─── HELPERS ─── */
@@ -604,6 +655,15 @@ const round = v => Math.round(v * 100) / 100;
 const productById = id => PRODUCTS.find(p => p.id === id);
 const pName = p => (state.lang === 'en' ? PRODUCT_I18N[p.id]?.name : null) ?? p.name;
 const pDesc = p => (state.lang === 'en' ? PRODUCT_I18N[p.id]?.desc : null) ?? p.desc;
+/* Una hamburguesa que el cliente ha pasado a combo tiene que leerse igual
+   que un Menú de la carta ("Menú The Big Carl") en el carrito, el resumen,
+   el ticket y la cocina; si no, el mismo pedido aparece de dos formas
+   distintas según por dónde se haya pedido. */
+const cartItemName = item => {
+  const prod = productById(item.productId);
+  const base = prod ? pName(prod) : item.name;
+  return item.isCombo ? t('comboItemName')(base) : base;
+};
 const modLabel = mod => t('mod-' + mod.id) || mod.label;
 function modTotal(mods) {
   return mods.reduce((s, id) => s + (MODIFIERS.find(m => m.id === id)?.price || 0), 0);
@@ -674,14 +734,182 @@ function init() {
   bindComboDialog();
   bindRegisterDialog();
   bindLangSwitcher();
+  bindDiningDialog();
+  bindBurgerTypeDialog();
+  bindServiceDialog();
   updatePointsDisplay();
+  renderDiningChip();
 }
 
 /* ─── WELCOME ─── */
 function bindWelcome() {
-  $('btnStart').addEventListener('click', () => startApp(true));
+  $('btnStart').addEventListener('click', () => {
+    renderDiningDialog();
+    safeModal($('diningDialog'));
+  });
   initSlider();
   applyI18n();
+}
+
+/* ─── COMER AQUÍ / PARA LLEVAR ─── */
+function bindDiningDialog() {
+  $('diningClose').addEventListener('click', () => safeClose($('diningDialog')));
+  $('diningDialog').addEventListener('click', e => { if (e.target === $('diningDialog')) safeClose($('diningDialog')); });
+  $('btnDiningHere').addEventListener('click', () => selectDining('here'));
+  $('btnDiningTogo').addEventListener('click', () => selectDining('togo'));
+  $('diningChip').addEventListener('click', () => {
+    renderDiningDialog();
+    safeModal($('diningDialog'));
+  });
+}
+
+function renderDiningDialog() {
+  $('diningTitleEl').textContent = t('diningTitle');
+  $('diningHereLabel').textContent = t('diningHere');
+  $('diningTogoLabel').textContent = t('diningToGo');
+  $('btnDiningHere').classList.toggle('selected', state.dining === 'here');
+  $('btnDiningTogo').classList.toggle('selected', state.dining === 'togo');
+}
+
+function selectDining(choice) {
+  state.dining = choice;
+  renderDiningChip();
+  safeClose($('diningDialog'));
+  // La primera vez (desde la bienvenida) esta elección también arranca la app.
+  const w = $('welcome');
+  if (w && !w.classList.contains('out')) startApp(true);
+}
+
+function renderDiningChip() {
+  const isTogo = state.dining === 'togo';
+  $('diningChipIcon').textContent = isTogo ? '🥡' : '🍽️';
+  $('diningChipLabel').textContent = isTogo ? t('diningToGoShort') : t('diningHereShort');
+  $('diningChip').classList.toggle('togo', isTogo);
+}
+
+/* ─── ACCESIBILIDAD: MODO SILLA DE RUEDAS ───
+   El interruptor vive al final del rail de categorías, anclado abajo: es
+   el único control que tiene que estar al alcance ANTES de activar el
+   modo, así que no puede ir arriba (topbar) ni flotando sobre la pantalla
+   (se comía el botón de pagar del checkout). */
+const a11yLowered = () => document.body.classList.contains('a11y-lowered');
+
+function bindA11yToggle() {
+  const btn = $('btnA11yMode');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const on = document.body.classList.toggle('a11y-lowered');
+    btn.classList.toggle('is-on', on);
+    btn.setAttribute('aria-pressed', String(on));
+    const label = $('a11yLabel');
+    if (label) label.textContent = on ? t('a11yRestore') : t('a11yLower');
+  });
+}
+
+/* ─── ENTREGA: RECOGER EN MOSTRADOR O SERVIR EN MESA ───
+   Igual que en McDonald's: si el cliente come en el local, después de pagar
+   elige si lo recoge él o se lo llevamos, y en ese caso teclea el número
+   del cartelito que coge junto al kiosco. */
+const TABLE_NUM_MAX = 99;
+let serviceDone = null;
+let serviceTimer = null;
+
+function bindServiceDialog() {
+  $('btnServicePickup').addEventListener('click', () => finishService('pickup'));
+  $('btnServiceTable').addEventListener('click', showTableStep);
+  $('btnServiceBack').addEventListener('click', renderServiceDialog);
+  $('btnServiceConfirm').addEventListener('click', () => {
+    if (validTableNumber()) finishService('table');
+  });
+}
+
+function validTableNumber() {
+  return Number.isInteger(state.tableNumber) && state.tableNumber >= 1 && state.tableNumber <= TABLE_NUM_MAX;
+}
+
+function askServiceMode(done) {
+  // Para llevar no hay nada que preguntar: siempre se recoge.
+  if (state.dining !== 'here') {
+    state.service = 'pickup';
+    state.tableNumber = null;
+    done();
+    return;
+  }
+  serviceDone = done;
+  state.service = null;
+  state.tableNumber = null;
+  // El diálogo de pago ya no pinta nada: se cierra para no verse detrás
+  // (lo reabre _showSuccessScreen con el resguardo del pedido).
+  safeClose($('checkoutDialog'));
+  renderServiceDialog();
+  safeModal($('serviceDialog'));
+
+  /* Un kiosco no puede quedarse esperando indefinidamente con un pedido ya
+     cobrado sin mandar: si el cliente se va sin tocar nada, sale como
+     recogida en mostrador y el pedido llega igualmente a cocina. */
+  clearTimeout(serviceTimer);
+  serviceTimer = setTimeout(() => finishService('pickup'), 30000);
+}
+
+function renderServiceDialog() {
+  $('svTitleEl').textContent   = t('serviceTitle');
+  $('svSubEl').textContent     = t('serviceSub');
+  $('svPickupLabel').textContent = t('servicePickup');
+  $('svPickupHint').textContent  = t('servicePickupHint');
+  $('svTableLabel').textContent  = t('serviceTable');
+  $('svTableHint').textContent   = t('serviceTableHint');
+  $('svChoiceStep').hidden = false;
+  $('svTableStep').hidden  = true;
+  $('svFooter').hidden     = true;
+}
+
+function showTableStep() {
+  $('svChoiceStep').hidden = true;
+  $('svTableStep').hidden  = false;
+  $('svFooter').hidden     = false;
+  $('svTableAsk').textContent = t('serviceTableAsk');
+  $('btnServiceBack').textContent = t('quizBack');
+  renderKeypad();
+  updateTableNum();
+  $('serviceDialog').scrollTop = 0;
+}
+
+function renderKeypad() {
+  const keys = ['1','2','3','4','5','6','7','8','9','', '0','⌫'];
+  $('svKeypad').innerHTML = keys.map(k => k
+    ? `<button class="keypad-key${k === '⌫' ? ' keypad-del' : ''}" data-key="${k}" type="button">${k}</button>`
+    : '<span></span>').join('');
+  $('svKeypad').querySelectorAll('[data-key]').forEach(btn => {
+    btn.addEventListener('click', () => pressTableKey(btn.dataset.key));
+  });
+}
+
+function pressTableKey(key) {
+  const current = state.tableNumber == null ? '' : String(state.tableNumber);
+  const next = key === '⌫'
+    ? current.slice(0, -1)
+    : (current + key).replace(/^0+/, '').slice(0, String(TABLE_NUM_MAX).length);
+  state.tableNumber = next ? parseInt(next, 10) : null;
+  updateTableNum();
+}
+
+function updateTableNum() {
+  $('svTableNum').textContent = state.tableNumber ?? '--';
+  const ok = validTableNumber();
+  $('btnServiceConfirm').disabled = !ok;
+  $('btnServiceConfirm').textContent = ok
+    ? `${t('serviceConfirm')} ${state.tableNumber}`
+    : t('serviceConfirmHint');
+}
+
+function finishService(mode) {
+  clearTimeout(serviceTimer);
+  state.service = mode;
+  if (mode !== 'table') state.tableNumber = null;
+  safeClose($('serviceDialog'));
+  const done = serviceDone;
+  serviceDone = null;
+  if (done) done();
 }
 
 function startApp(isGuest) {
@@ -778,6 +1006,12 @@ function renderCatNav() {
       <span class="cat-nav-ai-sparkle">✨</span>
       <span>${t('aiBtnLabel')}</span>
     </button>
+    <button class="cat-tab cat-nav-a11y ${a11yLowered() ? 'is-on' : ''}" id="btnA11yMode" type="button"
+            aria-pressed="${a11yLowered()}"
+            aria-label="Modo silla de ruedas: bajar el menú a la parte alcanzable de la pantalla">
+      <span class="cat-nav-a11y-icon" aria-hidden="true">♿</span>
+      <span id="a11yLabel">${a11yLowered() ? t('a11yRestore') : t('a11yLower')}</span>
+    </button>
   `;
   $('catNav').querySelectorAll('[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -793,6 +1027,9 @@ function renderCatNav() {
     });
   });
   $('btnAI').addEventListener('click', openQuiz);
+  // El rail se repinta al cambiar de categoría o de idioma, así que el
+  // botón se vuelve a enlazar aquí (igual que el de "Sorpréndeme").
+  bindA11yToggle();
 }
 
 /* ─── PRODUCTS ─── */
@@ -896,7 +1133,8 @@ function openProduct(id) {
   if (p.isMystery) { openMysteryConfigurator(p); return; }
   if (p.cat === 'drinks') { openDrinkPicker(p); return; }
   if (p.cat === 'combos' || p.cat === 'kids') { openComboConfigurator(p, 'combo'); return; }
-  if (p.cat === 'burgers' || p.cat === 'salads') { openComboConfigurator(p, 'solo'); return; }
+  if (p.cat === 'burgers') { openBurgerTypeDialog(p); return; }
+  if (p.cat === 'salads') { openComboConfigurator(p, 'solo'); return; }
   dialogProduct = p;
   dialogQty = 1;
   dialogMods = [];
@@ -904,6 +1142,37 @@ function openProduct(id) {
   safeModal($('productDialog'));
   // Scroll dialog to top
   setTimeout(() => $('productDialog').scrollTop = 0, 10);
+}
+
+/* ─── INDIVIDUAL / EN COMBO (hamburguesas) ─── */
+let burgerTypeProduct = null;
+
+function bindBurgerTypeDialog() {
+  $('btClose').addEventListener('click', () => safeClose($('burgerTypeDialog')));
+  $('burgerTypeDialog').addEventListener('click', e => { if (e.target === $('burgerTypeDialog')) safeClose($('burgerTypeDialog')); });
+  $('btnBurgerSolo').addEventListener('click', () => {
+    safeClose($('burgerTypeDialog'));
+    openComboConfigurator(burgerTypeProduct, 'solo');
+  });
+  $('btnBurgerCombo').addEventListener('click', () => {
+    safeClose($('burgerTypeDialog'));
+    openComboConfigurator(burgerTypeProduct, 'burgercombo');
+  });
+}
+
+function renderBurgerTypeDialog(p) {
+  $('btTitleEl').textContent = t('burgerTypeTitle');
+  $('btSubEl').textContent = t('burgerTypeSub');
+  $('btSoloLabel').textContent = t('burgerSolo');
+  $('btComboLabel').textContent = t('burgerCombo');
+  $('btSoloPrice').textContent = EUR.format(p.price);
+  $('btComboPrice').textContent = `${EUR.format(p.price + BURGER_COMBO_SURCHARGE)} · ${t('burgerComboHint')}`;
+}
+
+function openBurgerTypeDialog(product) {
+  burgerTypeProduct = product;
+  renderBurgerTypeDialog(product);
+  safeModal($('burgerTypeDialog'));
 }
 
 function renderProductDialog(p) {
@@ -1013,12 +1282,16 @@ function closeCart() {
 /* `extras` es el recargo de bebida/acompañamiento/postre elegidos en el
    configurador. Sin él, el carrito cobraba solo el precio base del producto
    aunque el modal hubiese mostrado un total mayor. */
-function addToCart(product, mods = [], qty = 1, note = '', extras = 0) {
+function addToCart(product, mods = [], qty = 1, note = '', extras = 0, isCombo = false) {
   const modsSig = [...mods].sort().join(',');
+  /* isCombo entra en la comparación: la misma burger suelta con bebida y
+     patatas a la carta genera la misma nota que en combo, pero no cuesta
+     lo mismo, así que no pueden fundirse en una sola línea. */
   const existing = state.cart.find(i =>
     i.productId === product.id &&
     [...i.mods].sort().join(',') === modsSig &&
-    i.note === note
+    i.note === note &&
+    !!i.isCombo === !!isCombo
   );
   if (existing) {
     existing.qty += qty;
@@ -1032,12 +1305,13 @@ function addToCart(product, mods = [], qty = 1, note = '', extras = 0) {
       extras,
       mods,
       qty,
-      note
+      note,
+      isCombo
     });
   }
   renderCart();
   triggerUpsell();
-  showToast(t('toastAdded')(pName(product)));
+  showToast(t('toastAdded')(isCombo ? t('comboItemName')(pName(product)) : pName(product)));
   launchConfetti();
 
   // Reto del día: si añaden Crisscuts
@@ -1092,8 +1366,7 @@ function renderCart() {
   if ($('payBtnLabel')) $('payBtnLabel').textContent = t('payBtn');
 
   $('cartItems').innerHTML = state.cart.length ? state.cart.map(item => {
-    const prod = productById(item.productId);
-    const itemName = prod ? pName(prod) : item.name;
+    const itemName = cartItemName(item);
     const labels = item.mods.map(id => { const m = MODIFIERS.find(m => m.id === id); return m ? modLabel(m) : null; }).filter(Boolean);
     return `
       <div class="cart-line">
@@ -1453,6 +1726,7 @@ function bindCheckout() {
     $('checkoutPayment').hidden = false;
     $('checkoutSuccess').hidden = true;
     safeModal($('checkoutDialog'));
+    $('checkoutDialog').scrollTop = 0;
     closeCart();
   });
   $('btnCancelCheckout').addEventListener('click', () => {
@@ -1553,13 +1827,16 @@ function pushOrderToKDS(cartSnapshot, num) {
       id: num,
       timestamp: Date.now(),
       status: 'pending',
+      dining: state.dining,
+      service: state.service,
+      table: state.service === 'table' ? state.tableNumber : null,
       items: cartSnapshot.map(i => {
         const prod = productById(i.productId);
         const modLabels = i.mods.map(id => {
           const m = MODIFIERS.find(m => m.id === id);
           return m ? modLabel(m) : null;
         }).filter(Boolean);
-        return { name: prod ? pName(prod) : i.name, qty: i.qty, mods: modLabels, img: prod?.img || null };
+        return { name: cartItemName(i), qty: i.qty, mods: modLabels, img: prod?.img || null };
       })
     };
     // Se añade sobre la lista real del servidor (transacción), no sobre la
@@ -1584,9 +1861,14 @@ function confirmPayment() {
     stripePending = false;
     if (btn) { btn.disabled = false; btn.textContent = t('confirmPayLabel'); }
     addPoints(pts);
-    CJSync.nextOrderNum(orderNum => {
-      pushOrderToKDS(cartSnapshot, orderNum);
-      _showSuccessScreen(orderNum, pts, cartSnapshot, total);
+    /* Antes de mandar nada a cocina se pregunta si lo recoge el cliente o
+       se lo llevamos a la mesa: el número de mesa tiene que viajar con el
+       pedido al KDS y al ticket. */
+    askServiceMode(() => {
+      CJSync.nextOrderNum(orderNum => {
+        pushOrderToKDS(cartSnapshot, orderNum);
+        _showSuccessScreen(orderNum, pts, cartSnapshot, total);
+      });
     });
   }, 600);
 }
@@ -1605,10 +1887,14 @@ function _showSuccessScreen(orderNum, pts, cartSnapshot, total) {
   const summaryEl = $('orderSummary');
   summaryEl.innerHTML = `
     <div class="os-title">${t('orderSummaryTitle')}</div>
+    <div class="os-line os-dining"><span>${t('orderSummaryDining')(state.dining)}</span></div>
+    ${state.dining === 'here'
+      ? `<div class="os-line os-dining os-service"><span>${state.service === 'table' ? t('summaryTable')(state.tableNumber) : t('summaryPickup')}</span></div>`
+      : ''}
     <div class="os-items">
       ${cartSnapshot.map(i => `
         <div class="os-line">
-          <span>${(() => { const pr = productById(i.productId); return pr ? pName(pr) : i.name; })()} ×${i.qty}</span>
+          <span>${cartItemName(i)} ×${i.qty}</span>
           <span>${EUR.format(cartLineTotal(i))}</span>
         </div>
       `).join('')}
@@ -1657,6 +1943,14 @@ const receiptDate = new Date().toLocaleString('es-ES', {
 
 const rule = '-'.repeat(TICKET_COLUMNS);
 
+const diningLabel = state.dining === 'togo' ? t('ticketDiningToGo') : t('ticketDiningHere');
+
+/* Si se sirve en mesa, el número del cartelito es lo que necesita el
+   camarero para encontrar al cliente: va destacado en el ticket. */
+const serviceLabel = state.dining !== 'here'
+  ? ''
+  : state.service === 'table' ? t('ticketTable')(state.tableNumber) : t('ticketPickup');
+
 /* INC-02: si print-helper.js no puede imprimir (ayudante caído, impresora
    no compartida, etc.) el cliente se quedaba con un botón de error y sin
    ticket. Este HTML es la red de seguridad: si falla la impresión
@@ -1670,12 +1964,12 @@ const receiptHtml = `
   <div class="ticket-date">${receiptDate}</div>
   <div class="ticket-rule"></div>
   <div class="ticket-order">PEDIDO #${orderNum}</div>
+  <div class="ticket-tag" style="font-weight:800">${diningLabel}</div>
+  ${serviceLabel ? `<div class="ticket-order" style="font-size:18px">${serviceLabel}</div>` : ''}
   <div class="ticket-rule"></div>
   ${cartSnapshot.map(item => {
-    const product = productById(item.productId);
-    const name = product ? pName(product) : item.name;
     const price = EUR.format(cartLineTotal(item));
-    return `<div class="ticket-line"><span>${item.qty}× ${name}</span><span>${price}</span></div>`;
+    return `<div class="ticket-line"><span>${item.qty}× ${cartItemName(item)}</span><span>${price}</span></div>`;
   }).join('')}
   <div class="ticket-rule"></div>
   <div class="ticket-line ticket-total"><span>TOTAL</span><span>${EUR.format(total)}</span></div>
@@ -1691,17 +1985,18 @@ const receiptLines = [
 
   PRN_ALIGN_LEFT + rule,
   PRN_ALIGN_CENTER + PRN_SIZE_DOUBLE + `PEDIDO #${orderNum}` + PRN_SIZE_NORMAL,
+  PRN_BOLD_ON + centerTicketText(diningLabel) + PRN_BOLD_OFF,
+  ...(serviceLabel
+    ? [PRN_ALIGN_CENTER + PRN_SIZE_DOUBLE + serviceLabel + PRN_SIZE_NORMAL]
+    : []),
   PRN_ALIGN_LEFT + rule,
 
   ...cartSnapshot.map(item => {
-    const product = productById(item.productId);
-    const name = product ? pName(product) : item.name;
-
     const price = EUR
       .format(cartLineTotal(item))
       .replace(/\u00A0/g, ' ');
 
-    return ticketRow(`${item.qty}x ${name}`, price);
+    return ticketRow(`${item.qty}x ${cartItemName(item)}`, price);
   }),
 
   rule,
@@ -1743,6 +2038,12 @@ const receiptText = receiptLines.join('\n');
 
   $('checkoutPayment').hidden = true;
   $('checkoutSuccess').hidden = false;
+  // Si se cerró para preguntar por la entrega en mesa, vuelve a abrirse ya
+  // con el resguardo montado, sin que se vea el paso de pago.
+  if (!$('checkoutDialog').open) safeModal($('checkoutDialog'));
+  // El resguardo empieza desde arriba: si no, hereda el scroll que tuviera
+  // la pantalla de pago y aparece empezado por la mitad.
+  $('checkoutDialog').scrollTop = 0;
   launchConfetti();
   state.cart = [];
   renderCart();
@@ -2060,11 +2361,26 @@ function openMysteryConfigurator(product) {
 }
 
 /* INC-04: la personalización de la hamburguesa va primero, después el resto de opciones */
-const COMBO_STEPS = ['mods', 'side', 'drink', 'dessert'];
+const COMBO_STEPS_FULL = ['mods', 'side', 'drink', 'dessert'];
+/* "Individual o en combo" en hamburguesas: el combo solo añade patatas +
+   bebida (sin forzar postre), así que se salta ese paso. */
+const COMBO_STEPS_BURGERCOMBO = ['mods', 'side', 'drink'];
+
+/* Recargo fijo al convertir una hamburguesa suelta en combo (patatas +
+   bebida). Los Menús ya montados de la carta no usan esto: llevan su
+   propio precio de conjunto. */
+const BURGER_COMBO_SURCHARGE = 70;
+
+/* Pinta el paso actual y lo deja visible desde arriba. */
+function goComboStep() {
+  renderComboDialog();
+  $('comboDialog').scrollTop = 0;
+}
 
 function openComboConfigurator(product, mode = 'combo') {
   comboState = {
     product, mode,
+    steps: mode === 'burgercombo' ? COMBO_STEPS_BURGERCOMBO : COMBO_STEPS_FULL,
     // En productos sueltos no hay opciones "Sin bebida/acompañamiento/postre":
     // se empieza sin nada seleccionado y basta con no elegir nada.
     drink: null, side: null, dessert: null,
@@ -2072,6 +2388,7 @@ function openComboConfigurator(product, mode = 'combo') {
   };
   renderComboDialog();
   safeModal($('comboDialog'));
+  $('comboDialog').scrollTop = 0;
 }
 
 function comboStepBlockMsg(stepKey) {
@@ -2092,12 +2409,14 @@ function comboTotal() {
   const sideCost    = optPrice(comboState.side,     'extra');
   const dessertCost = (comboState.dessert?.extra ?? 0);
   const modsExtra   = comboState.mods.reduce((s, id) => s + (BURGER_MODS.find(m => m.id === id)?.price || 0), 0);
-  return round((comboState.product.price + drinkCost + sideCost + dessertCost + modsExtra) * comboState.qty);
+  const comboSurcharge = comboState.mode === 'burgercombo' ? BURGER_COMBO_SURCHARGE : 0;
+  return round((comboState.product.price + comboSurcharge + drinkCost + sideCost + dessertCost + modsExtra) * comboState.qty);
 }
 
 function comboReady() {
   if (comboState.product?.isMystery) return !!comboState.drink;
   if (comboState.mode === 'solo') return true; // none options preselected, always ready
+  if (comboState.mode === 'burgercombo') return !!(comboState.drink && comboState.side);
   return !!(comboState.drink && comboState.side && comboState.dessert);
 }
 
@@ -2110,7 +2429,7 @@ function comboBlockMsg() {
   }
   if (!comboState.drink)   return '🥤 Elige tu bebida primero';
   if (!comboState.side)    return '🍟 Elige tu acompañamiento';
-  if (!comboState.dessert) return '🍦 Elige el postre';
+  if (comboState.mode !== 'burgercombo' && !comboState.dessert) return '🍦 Elige el postre';
   return null;
 }
 
@@ -2171,9 +2490,10 @@ function renderComboDialog() {
     </button>
   `).join('');
 
+  const steps    = comboState.steps || COMBO_STEPS_FULL;
   const stepIdx  = comboState.step;
-  const stepKey  = COMBO_STEPS[stepIdx];
-  const isLast   = stepIdx === COMBO_STEPS.length - 1;
+  const stepKey  = steps[stepIdx];
+  const isLast   = stepIdx === steps.length - 1;
 
   const stepSection = {
     drink:   `<h3>${t('chooseDrink')} ${!isSolo ? '<span class="combo-required">*</span>' : ''}</h3><div class="combo-options">${drinkHtml}</div>`,
@@ -2182,7 +2502,7 @@ function renderComboDialog() {
     mods:    `<h3>${t('customizeBurger')}</h3><div class="combo-mods">${modsHtml}</div>`,
   }[stepKey];
 
-  const dotsHtml = COMBO_STEPS.map((_, i) => `<span class="combo-step-dot ${i === stepIdx ? 'active' : i < stepIdx ? 'done' : ''}"></span>`).join('');
+  const dotsHtml = steps.map((_, i) => `<span class="combo-step-dot ${i === stepIdx ? 'active' : i < stepIdx ? 'done' : ''}"></span>`).join('');
   const blockMsg = comboStepBlockMsg(stepKey);
 
   $('comboContent').innerHTML = `
@@ -2265,15 +2585,18 @@ function renderComboDialog() {
     });
   });
 
-  // Navegación entre pasos
+  /* Navegación entre pasos. El scroll se reinicia SOLO al cambiar de paso
+     (no en cada re-render): si no, el paso siguiente heredaba el scroll del
+     anterior y aparecía empezado por la mitad; y reiniciarlo en cada click
+     daría un salto al principio cada vez que se elige una opción. */
   if (stepIdx > 0) {
-    $('btnComboBack').addEventListener('click', () => { comboState.step--; renderComboDialog(); });
+    $('btnComboBack').addEventListener('click', () => { comboState.step--; goComboStep(); });
   }
   if (!isLast) {
     $('btnComboNext').addEventListener('click', () => {
       if (comboStepBlockMsg(stepKey)) return;
       comboState.step++;
-      renderComboDialog();
+      goComboStep();
     });
   }
 
@@ -2292,13 +2615,15 @@ function renderComboDialog() {
         chosen(comboState.dessert) ? `Postre: ${comboState.dessert.label}` : ''
       ].filter(Boolean).join(' · ');
 
-      // Recargo de los extras elegidos, para que el carrito cobre lo mismo
-      // que el total mostrado en el configurador.
-      const extras = optPrice(comboState.drink, 'extra')
+      // Recargo de los extras elegidos (+ el recargo fijo de combo, si aplica),
+      // para que el carrito cobre lo mismo que el total mostrado en el configurador.
+      const comboSurcharge = comboState.mode === 'burgercombo' ? BURGER_COMBO_SURCHARGE : 0;
+      const extras = comboSurcharge
+                   + optPrice(comboState.drink, 'extra')
                    + optPrice(comboState.side,  'extra')
                    + (comboState.dessert?.extra ?? 0);
 
-      addToCart(comboState.product, comboState.mods, comboState.qty, note, extras);
+      addToCart(comboState.product, comboState.mods, comboState.qty, note, extras, comboState.mode === 'burgercombo');
       safeClose($('comboDialog'));
     });
   }
@@ -2389,6 +2714,15 @@ function setLang(lang) {
   if ($('btnPay')) $('btnPay').textContent = t('confirmPayLabel');
   if ($('btnCancelCheckout')) $('btnCancelCheckout').textContent = t('backOrderLabel');
   if ($('howPayTitle')) $('howPayTitle').textContent = t('howPay');
+  renderDiningChip();
+  if ($('diningDialog').open) renderDiningDialog();
+  if ($('burgerTypeDialog').open && burgerTypeProduct) renderBurgerTypeDialog(burgerTypeProduct);
+  // El diálogo de entrega solo aparece tras pagar; si estuviera abierto al
+  // cambiar de idioma, se repinta en el paso en el que esté.
+  if ($('serviceDialog').open) {
+    if ($('svTableStep').hidden) renderServiceDialog();
+    else { renderServiceDialog(); showTableStep(); }
+  }
 }
 
 function bindLangSwitcher() {

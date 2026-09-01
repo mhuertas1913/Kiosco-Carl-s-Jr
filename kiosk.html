@@ -58,6 +58,10 @@
     <header class="topbar">
       <button id="btnBackToWelcome" class="topbar-logo-hit" type="button" aria-label="Inicio"></button>
       <div class="topbar-right">
+        <button id="diningChip" class="dining-chip" type="button" aria-label="Cambiar entre comer aquí y para llevar">
+          <span id="diningChipIcon" aria-hidden="true">🍽️</span>
+          <span id="diningChipLabel">Comer aquí</span>
+        </button>
         <div class="topbar-points" id="pointsDisplay" aria-label="Tus puntos">
           <span class="points-icon">⭐</span>
           <span id="pointsValue">0</span> <span class="points-label">pts</span>
@@ -125,6 +129,14 @@
 
   </div>
 
+  <!-- ───────────── TELÓN DEL MODO ACCESIBLE ─────────────
+       Rellena la mitad de arriba cuando el menú baja, para que no quede
+       media pantalla en negro. Solo decorativo: no recibe toques. -->
+  <div id="a11yBackdrop" class="a11y-backdrop" aria-hidden="true">
+    <img src="./star-carlsjr.png" alt="" class="a11y-backdrop-star">
+    <p class="a11y-backdrop-tag">Bigger. Better. Burgers.</p>
+  </div>
+
   <!-- ───────────── PANEL CARRITO ───────────── -->
   <aside id="cartPanel" class="cart-panel" aria-label="Tu pedido" aria-hidden="true">
     <div class="cart-header">
@@ -186,6 +198,101 @@
   <dialog id="comboDialog" class="combo-dialog" aria-labelledby="comboTitle">
     <button class="pd-close" id="comboClose" type="button" aria-label="Cerrar">✕</button>
     <div id="comboContent" class="combo-content"></div>
+  </dialog>
+
+  <!-- ───────────── DIALOG COMER AQUÍ / PARA LLEVAR ───────────── -->
+  <dialog id="diningDialog" class="combo-dialog" aria-labelledby="diningTitleEl">
+    <button class="pd-close" id="diningClose" type="button" aria-label="Cerrar">✕</button>
+    <div class="combo-content choice-content">
+      <div class="combo-body">
+        <div class="combo-name" id="diningTitleEl">¿Vas a comer aquí o te lo llevas?</div>
+        <div class="combo-section">
+          <div class="combo-options choice-options-lg">
+            <button class="combo-opt choice-opt" id="btnDiningHere" type="button">
+              <span class="combo-opt-icon">🍽️</span>
+              <div><div class="combo-opt-label" id="diningHereLabel">Comer aquí</div></div>
+            </button>
+            <button class="combo-opt choice-opt" id="btnDiningTogo" type="button">
+              <span class="combo-opt-icon">🥡</span>
+              <div><div class="combo-opt-label" id="diningTogoLabel">Para llevar</div></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ───────────── DIALOG INDIVIDUAL / EN COMBO (hamburguesas) ───────────── -->
+  <dialog id="burgerTypeDialog" class="combo-dialog" aria-labelledby="btTitleEl">
+    <button class="pd-close" id="btClose" type="button" aria-label="Cerrar">✕</button>
+    <div class="combo-content choice-content">
+      <div class="combo-body">
+        <div class="combo-name" id="btTitleEl">¿Cómo la quieres?</div>
+        <div class="combo-desc" id="btSubEl">Puedes personalizarla en el siguiente paso</div>
+        <div class="combo-section">
+          <div class="combo-options choice-options-lg">
+            <button class="combo-opt choice-opt" id="btnBurgerSolo" type="button">
+              <span class="combo-opt-icon">🍔</span>
+              <div>
+                <div class="combo-opt-label" id="btSoloLabel">Individual</div>
+                <div class="combo-opt-price" id="btSoloPrice"></div>
+              </div>
+            </button>
+            <button class="combo-opt choice-opt" id="btnBurgerCombo" type="button">
+              <span class="combo-opt-icon">🍟</span>
+              <div>
+                <div class="combo-opt-label" id="btComboLabel">En combo</div>
+                <div class="combo-opt-price" id="btComboPrice"></div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ───────────── DIALOG ENTREGA: RECOGER O SERVIR EN MESA ─────────────
+       Sale después de pagar y solo si el cliente come en el local. No lleva
+       botón de cerrar: es el último paso antes de mandar el pedido a
+       cocina (si nadie lo toca, se envía solo como recogida). -->
+  <dialog id="serviceDialog" class="combo-dialog" aria-labelledby="svTitleEl">
+    <div class="combo-content choice-content">
+      <div class="combo-body">
+        <div class="combo-name" id="svTitleEl">¿Cómo quieres recibir tu pedido?</div>
+        <div class="combo-desc" id="svSubEl">Tu pago ya está confirmado ✅</div>
+
+        <div class="combo-section" id="svChoiceStep">
+          <div class="combo-options choice-options-lg">
+            <button class="combo-opt choice-opt" id="btnServicePickup" type="button">
+              <span class="combo-opt-icon">🛎️</span>
+              <div>
+                <div class="combo-opt-label" id="svPickupLabel">Voy a recogerlo</div>
+                <div class="combo-opt-price" id="svPickupHint">Te avisamos con tu número</div>
+              </div>
+            </button>
+            <button class="combo-opt choice-opt" id="btnServiceTable" type="button">
+              <span class="combo-opt-icon">🪑</span>
+              <div>
+                <div class="combo-opt-label" id="svTableLabel">Que me lo lleven</div>
+                <div class="combo-opt-price" id="svTableHint">Servicio a tu mesa</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="combo-section" id="svTableStep" hidden>
+          <h3 id="svTableAsk">Coge un cartelito con número junto al kiosco y escribe aquí ese número</h3>
+          <div class="table-num" id="svTableNum">--</div>
+          <div class="keypad" id="svKeypad"></div>
+        </div>
+      </div>
+      <div class="combo-footer" id="svFooter" hidden>
+        <div class="combo-step-nav">
+          <button class="btn-secondary combo-step-back" id="btnServiceBack" type="button">← Volver</button>
+          <button class="btn-add-cart" id="btnServiceConfirm" type="button" disabled>Confirmar mesa</button>
+        </div>
+      </div>
+    </div>
   </dialog>
 
   <!-- ───────────── DIALOG REGISTRO (desde checkout) ───────────── -->
