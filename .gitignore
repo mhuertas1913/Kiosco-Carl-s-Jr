@@ -4,6 +4,10 @@
 # Tickets generados en pruebas locales
 pedido-*.txt
 
+# Registros del PC del kiosco (uno por maquina, no se versionan)
+inicio-kiosco.log
+print-helper.log
+
 # Sistema
 Thumbs.db
 .DS_Store

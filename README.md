@@ -64,16 +64,36 @@ Abre en el propio PC del kiosco **<http://localhost:5217/salud>**. Devuelve el e
 
 
 ## Inicio automático del helper de impresión
-El archivo abrir-kiosco.bat inicia el helper local de impresión. Debe ejecutarse automáticamente al iniciar sesión en Windows.
 
-Pulsa Win + R.
+`abrir-kiosco.bat` arranca el ayudante local de impresión y debe ejecutarse al iniciar sesión en Windows. Hay dos formas; la primera es la recomendada.
 
-Escribe:
+### Opción A (recomendada): tarea programada
 
-shell:startup
+Doble clic **una vez** en `instalar-inicio-automatico.bat`, desde la carpeta del proyecto. Registra una tarea que arranca el ayudante 30 segundos después de iniciar sesión.
 
-En la carpeta que se abre, crea un acceso directo a:
+Es más robusto que la carpeta de Inicio porque la tarea guarda la ruta completa del proyecto, así que no se puede romper moviendo o copiando archivos. Si ya tenías un acceso directo en la carpeta de Inicio, bórralo para no arrancar dos veces.
 
-C:\Users\Admin\Documents\Kiosco-Carl-s-Jr-main\abrir-kiosco.bat
+Para quitarla:
 
-No copies el archivo .bat a la carpeta de inicio; crea solamente un acceso directo.
+```
+schtasks /Delete /TN "Kiosco Carls Jr - Ayudante de impresion" /F
+```
+
+### Opción B: carpeta de Inicio
+
+Win + R → `shell:startup`. En la carpeta que se abre, crea un **acceso directo** a `abrir-kiosco.bat`.
+
+**No copies el `.bat` a la carpeta de Inicio.** El script localiza al ayudante a partir de su propia carpeta (`%~dp0`): si se copia, esa carpeta pasa a ser la de Inicio, donde no está ni `iniciar-impresora.vbs` ni `print-helper.js`, y no arranca nada — aunque ejecutándolo a mano desde su sitio funcione perfectamente. Es el fallo más habitual de esta opción.
+
+### Si no arranca solo al encender el ordenador
+
+Mira **`inicio-kiosco.log`**, en la carpeta del proyecto: cada arranque deja ahí la carpeta que ha resuelto y lo que ha hecho.
+
+| Lo que dice el log | Lo que significa |
+| --- | --- |
+| No hay línea nueva tras reiniciar | No se está ejecutando: falta el acceso directo o la tarea programada. |
+| «Carpeta resuelta» apunta a la carpeta de Inicio | Hay una **copia** del `.bat` ahí en vez de un acceso directo (ver opción B). |
+| «print-helper.js no apareció… tras 60 segundos» | La carpeta del proyecto no estaba disponible. Pasa si `Documents` se sincroniza con OneDrive y los archivos aún no se han materializado al iniciar sesión: usa la opción A, que espera 30 s antes de empezar. |
+| «no se encontró Node.js en el PATH» | Falta Node.js, o está instalado solo para otro usuario de Windows. |
+
+El arranque espera hasta 60 segundos a que aparezca la carpeta en vez de fallar de golpe, y si `iniciar-impresora.vbs` no está (borrado, o bloqueado por el antivirus) arranca el ayudante igualmente por otra vía: quedarse sin impresora es peor que un parpadeo de ventana.
