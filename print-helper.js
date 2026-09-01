@@ -54,7 +54,25 @@ function withCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Private Network Access: si el kiosco se carga desde una web pública
+  // (GitHub Pages, https), Chrome trata "página de internet llamando a
+  // localhost" como una petición a la red privada y la bloquea salvo que
+  // el destino dé permiso explícito con esta cabecera. Sin ella la
+  // impresión falla en el tótem aunque el ayudante esté perfectamente
+  // arrancado, y el fallo no se ve como error de red normal.
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
 }
+
+/* Últimos resultados, para poder diagnosticar desde el propio tótem
+   abriendo http://localhost:5217/salud en el navegador. */
+const estado = {
+  arrancado: new Date().toISOString(),
+  impresos: 0,
+  fallos: 0,
+  ultimaImpresion: null,
+  ultimoError: null,
+};
 
 function safeOrderNum(n) {
   const s = String(n).replace(/[^a-zA-Z0-9_-]/g, '');
@@ -85,8 +103,16 @@ const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
 
   if (req.method === 'GET' && req.url === '/salud') {
+    /* Responde con el historial, no solo con ok:true: si el kiosco cae al
+       aviso de "impresora no responde", esto dice si el problema es que el
+       ayudante no recibe nada (impresos y fallos a 0) o que sí lo recibe y
+       es el recurso compartido de Windows el que falla (ultimoError). */
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true }));
+    res.end(JSON.stringify({
+      ok: true,
+      impresora: PRINTER_PATH,
+      ...estado,
+    }, null, 2));
     return;
   }
 
@@ -121,12 +147,21 @@ const server = http.createServer((req, res) => {
 
         printFileSilently(text, (printErr) => {
           if (printErr) {
+            estado.fallos++;
+            estado.ultimoError = {
+              cuando: new Date().toISOString(),
+              pedido: orderNum,
+              codigo: printErr.code || null,
+              mensaje: printErr.message,
+            };
             console.warn('[print-helper] Error al imprimir:', printErr);
             console.warn(`[print-helper] ¿Está la impresora compartida como "${PRINTER_SHARE}"?`);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: false, saved: !writeErr, error: 'No se pudo enviar a la impresora' }));
             return;
           }
+          estado.impresos++;
+          estado.ultimaImpresion = { cuando: new Date().toISOString(), pedido: orderNum };
           console.log(`[print-helper] Enviado a la impresora: pedido-${orderNum}`);
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ ok: true, saved: !writeErr, printed: true }));

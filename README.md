@@ -39,6 +39,29 @@ La web se carga desde GitHub Pages, pero la impresión se realiza localmente en 
 ## Flujo de impresión:
 Web del kiosco → print-helper.js local → impresora compartida TICKETS → Epson TM-m30II
 
+### Al cliente no le sale nunca el diálogo de Windows
+
+El ticket se imprime **solo** por HTTP contra el ayudante local (`POST http://localhost:5217/imprimir`), que vuelca el texto crudo a la impresora sin ninguna ventana.
+
+El diálogo de impresión del navegador **no se usa en el flujo del cliente**, a propósito: es una ventana del sistema con un botón *Cancelar* que deja el pedido pagado y sin ticket y, en un tótem sin vigilancia, es una vía para salirse de la aplicación (desde ahí se llega a «Guardar como PDF» y al explorador de archivos). Si la impresión falla, el cliente ve un aviso ámbar —el pedido ya está cobrado y en cocina— y puede reintentar.
+
+Queda disponible solo como herramienta de mantenimiento, pidiéndolo a propósito:
+
+- `?impresion-navegador=1` en la URL, o
+- `cj-print-fallback=1` en el `localStorage` del navegador del kiosco.
+
+### Si no imprime: cómo saber por qué
+
+Abre en el propio PC del kiosco **<http://localhost:5217/salud>**. Devuelve el estado del ayudante:
+
+| Lo que ves | Lo que significa |
+| --- | --- |
+| No carga nada | El ayudante no está arrancado. Ejecuta `abrir-kiosco.bat` y revisa `print-helper.log`. |
+| `impresos` y `fallos` a 0 tras un intento | El ayudante está vivo pero la petición del kiosco no le llega: lo está bloqueando el navegador (ver el punto siguiente). |
+| `ultimoError` con un mensaje sobre `\\localhost\TICKETS` | El ayudante recibe el ticket pero no puede escribir en la impresora: se ha dejado de compartir, o cambió el nombre del recurso compartido. |
+
+**Navegador bloqueando la petición:** al cargarse el kiosco desde una web pública (`https://…github.io`), Chrome considera que llamar a `localhost` es una petición a la red privada y la bloquea salvo que el destino la autorice. El ayudante manda ya la cabecera `Access-Control-Allow-Private-Network: true` para permitirlo. Si aun así se bloquea, servir el kiosco desde el propio PC (`http://localhost`) elimina el problema de raíz, porque deja de haber mezcla de orígenes.
+
 
 ## Inicio automático del helper de impresión
 El archivo abrir-kiosco.bat inicia el helper local de impresión. Debe ejecutarse automáticamente al iniciar sesión en Windows.

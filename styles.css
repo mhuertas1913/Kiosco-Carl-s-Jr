@@ -727,6 +727,21 @@ a { -webkit-tap-highlight-color: transparent; }
 }
 .btn-print-ticket:hover { border-color: #fff; color: #fff; }
 
+/* Aviso de impresora caída: informa sin dar miedo (el pedido ya está pagado
+   y en cocina), por eso es ámbar y no rojo de error. */
+.print-problem-note {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(255, 176, 32, .55);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 176, 32, .1);
+  color: #ffd18a;
+  font-size: .82rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
 /* CART PANEL */
 .cart-overlay {
   position: fixed; inset: 0; z-index: 59;
@@ -1574,6 +1589,7 @@ dialog[open] {
   .checkout-success h2 { font-size:3rem; }
   .success-points { font-size:1.5rem; }
   .btn-print-ticket { font-size:1.5rem; padding:22px 26px; margin:18px 0 26px; }
+  .print-problem-note { font-size:1.15rem; padding:16px 18px; }
   .order-summary { font-size:1.25rem; padding:24px 26px; }
   .os-title { font-size:1.1rem; }
 }
@@ -1788,6 +1804,7 @@ dialog[open] {
   .pay-hint { font-size: clamp(.75rem, 1.4vh, 1.35rem); padding: clamp(10px, 1.6vh, 20px) clamp(14px, 1.8vw, 26px); }
   .btn-secondary { font-size: clamp(.85rem, 1.6vh, 1.5rem); padding: clamp(12px, 1.8vh, 22px); margin-top: clamp(8px, 1.4vh, 18px); }
   .btn-print-ticket { font-size: clamp(.85rem, 1.6vh, 1.5rem); padding: clamp(12px, 1.8vh, 22px) clamp(14px, 1.8vw, 26px); margin: clamp(8px, 1.4vh, 18px) 0 clamp(12px, 1.8vh, 26px); }
+  .print-problem-note { font-size: clamp(.78rem, 1.2vh, 1.15rem); padding: clamp(9px, 1.3vh, 16px) clamp(10px, 1.2vw, 18px); }
   .order-summary { font-size: clamp(.78rem, 1.4vh, 1.25rem); padding: clamp(12px, 1.8vh, 24px) clamp(14px, 1.8vw, 26px); }
   .success-anim { font-size: clamp(2rem, 5vh, 4rem); }
   .order-id { font-size: clamp(1.8rem, 4.5vh, 4rem); }

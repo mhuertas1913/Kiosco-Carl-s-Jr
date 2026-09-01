@@ -2022,16 +2022,20 @@ const receiptText = receiptLines.join('\n');
   /* El ticket NO se imprime solo: únicamente si el cliente pulsa el botón.
      Al pulsarlo, todo pasa en segundo plano sin que el cliente vea nada:
      se guarda el .txt y se manda a imprimir a través del ayudante local
-     (print-helper.js), sin ningún diálogo del navegador. Si eso falla
-     (INC-02), se cae al diálogo de impresión del navegador con
-     receiptHtml para que el ticket salga igualmente. */
+     (print-helper.js), sin ningún diálogo del navegador. Si eso falla,
+     el cliente ve un aviso para avisar al personal y puede reintentar,
+     pero NUNCA se le abre el diálogo del sistema (ver printTicketSilently). */
   const btnPrint = $('btnPrintTicket');
   if (btnPrint) {
     btnPrint.disabled = false;
     btnPrint.textContent = '🖨️ Imprimir ticket';
+    hidePrintProblemNote();
     btnPrint.onclick = () => {
       btnPrint.disabled = true;
       btnPrint.textContent = '🖨️ Imprimiendo…';
+      hidePrintProblemNote();
+      // La recarga automática no puede pillar la impresión a medias.
+      stopSuccessCountdown();
       printTicketSilently(orderNum, receiptText, receiptHtml);
     };
   }
@@ -2048,9 +2052,24 @@ const receiptText = receiptLines.join('\n');
   state.cart = [];
   renderCart();
 
-  // Cuenta atrás y vuelta automática
+  startSuccessCountdown(SUCCESS_COUNTDOWN);
+}
+
+/* ─── CUENTA ATRÁS DEL RESGUARDO ───
+   Recarga el kiosco para dejarlo listo para el siguiente cliente. Se puede
+   parar y rearrancar a propósito: imprimir tarda unos segundos y no se
+   puede recargar la página mientras el cliente espera su ticket, porque se
+   quedaría sin ticket y sin ver el aviso de que algo ha fallado. */
+const SUCCESS_COUNTDOWN = 12;
+/* Si la impresión falla, el cliente tiene que leer el aviso y poder
+   reintentar: más tiempo, pero sin dejar el kiosco bloqueado si se marcha. */
+const SUCCESS_COUNTDOWN_PRINT_ERROR = 30;
+
+function startSuccessCountdown(seconds) {
   clearInterval(activeCountdownTimer);
-  let countdown = 12;
+  const box = $('countdownBox');
+  if (box) box.hidden = false;
+  let countdown = seconds;
   $('countdownVal').textContent = countdown;
   $('countdownMsg').textContent = t('countdownMsg') + '...';
   activeCountdownTimer = setInterval(() => {
@@ -2061,6 +2080,14 @@ const receiptText = receiptLines.join('\n');
       location.reload();
     }
   }, 1000);
+}
+
+/* Se oculta el recuadro además de parar el reloj: si se queda a la vista con
+   un número congelado, parece que el kiosco se ha colgado. */
+function stopSuccessCountdown() {
+  clearInterval(activeCountdownTimer);
+  const box = $('countdownBox');
+  if (box) box.hidden = true;
 }
 
 /* ─── POINTS ─── */
@@ -2092,69 +2119,139 @@ function animateDcBar(pct) {
    directamente con la impresora: eso es print-helper.js (ver ese archivo),
    un pequeño servidor que corre en el mismo PC del kiosco.
    Aquí solo le pedimos, por HTTP, que guarde e imprima. Si por lo que sea
-   no está corriendo, se avisa por consola y se recurre al método antiguo
-   (diálogo del navegador) para que el ticket salga de todos modos. */
-const PRINT_HELPER_URL = 'http://localhost:5217/imprimir';
+   no está corriendo, se reintenta una vez y se avisa al cliente en pantalla;
+   lo que NO se hace es abrir el diálogo del navegador (ver más abajo). */
+const PRINT_HELPER_BASE = 'http://localhost:5217';
+const PRINT_HELPER_URL = `${PRINT_HELPER_BASE}/imprimir`;
 
-function printTicketSilently(orderNum, text, fallbackHtml) {
-  fetch(PRINT_HELPER_URL, {
+/* Si el ayudante está caído, un fetch puede quedarse colgado hasta que el
+   navegador se canse (decenas de segundos). El cliente está de pie delante
+   de la pantalla y la cuenta atrás recarga a los 12 s, así que cortamos
+   pronto y reintentamos una vez: casi todos los fallos reales son un
+   tropiezo puntual del recurso compartido de Windows. */
+const PRINT_TIMEOUT_MS = 3500;
+const PRINT_ATTEMPTS = 2;
+
+/* El diálogo de impresión del navegador NO puede salirle nunca a un cliente:
+   es una ventana del SISTEMA, con un botón Cancelar que deja el pedido pagado
+   y sin ticket, y en un tótem sin vigilancia es además una vía para salirse
+   de la aplicación (desde ahí se llega a "Guardar como PDF" y al explorador
+   de archivos). Encima la recarga automática de la pantalla de éxito puede
+   cerrarlo a medias.
+   Se conserva como herramienta de mantenimiento —para probar la impresión
+   desde un PC sin el ayudante— pero hay que pedirlo a propósito:
+   ?impresion-navegador=1 en la URL, o cj-print-fallback=1 en localStorage. */
+function browserPrintAllowed() {
+  try {
+    return new URLSearchParams(location.search).get('impresion-navegador') === '1'
+      || localStorage.getItem('cj-print-fallback') === '1';
+  } catch {
+    return false;
+  }
+}
+
+function postToPrintHelper(payload) {
+  /* AbortController y no Promise.race: hay que cancelar la petición de
+     verdad, si no el reintento se suma a una petición que sigue viva. */
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), PRINT_TIMEOUT_MS);
+
+  return fetch(PRINT_HELPER_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      orderNum,
-      text
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: ctrl.signal,
   })
     .then(async response => {
       const result = await response.json();
-
       if (!response.ok || !result.ok) {
         throw new Error(result.error || `Error HTTP ${response.status}`);
       }
-
       return result;
     })
-    .then(() => {
-      const btnPrint = $('btnPrintTicket');
+    .finally(() => clearTimeout(timer));
+}
 
-      console.log(
-        `[Tickets] pedido-${orderNum}.txt enviado a la impresora.`
-      );
+async function printTicketSilently(orderNum, text, fallbackHtml) {
+  const btnPrint = $('btnPrintTicket');
+  let lastError = null;
 
+  for (let intento = 1; intento <= PRINT_ATTEMPTS; intento++) {
+    try {
+      await postToPrintHelper({ orderNum, text });
+      console.log(`[Tickets] pedido-${orderNum}.txt enviado a la impresora.`);
       if (btnPrint) {
         btnPrint.disabled = true;
         btnPrint.textContent = '🖨️ Ticket impreso';
       }
-    })
-    .catch(error => {
-      /* INC-02: antes, si esto fallaba (ayudante caído, impresora no
-         compartida...), el cliente se quedaba solo con un botón de error
-         y sin ticket. Ahora se cae al diálogo de impresión del navegador
-         como red de seguridad, para que el ticket salga de una forma u
-         otra — igual que decía el comentario de arriba, pero que no se
-         llegaba a hacer realmente. */
-      console.warn(
-        '[Tickets] No se pudo imprimir mediante print-helper.js, se usa el diálogo del navegador:',
-        error
-      );
-
-      if (fallbackHtml) printReceipt(fallbackHtml);
-
-      const btnPrint = $('btnPrintTicket');
-
-      if (btnPrint) {
-        btnPrint.disabled = false;
-        btnPrint.textContent = '🖨️ Imprimir ticket';
+      startSuccessCountdown(SUCCESS_COUNTDOWN);
+      return;
+    } catch (error) {
+      lastError = error;
+      console.warn(`[Tickets] Intento ${intento}/${PRINT_ATTEMPTS} fallido:`, error);
+      if (intento < PRINT_ATTEMPTS) {
+        await new Promise(res => setTimeout(res, 600));
       }
-    });
+    }
+  }
+
+  /* Pistas para quien atienda el tótem: las dos causas reales son que el
+     ayudante no esté arrancado o que la impresora no esté compartida. */
+  console.error(
+    '[Tickets] No se pudo imprimir mediante print-helper.js.',
+    '\n  1) ¿Está arrancado el ayudante? Abre ' + PRINT_HELPER_BASE + '/salud',
+    '\n  2) ¿Sigue compartida la impresora como TICKETS?',
+    '\n  Detalle:', lastError
+  );
+
+  if (browserPrintAllowed() && fallbackHtml) {
+    console.warn('[Tickets] Recurriendo al diálogo del navegador (modo mantenimiento).');
+    printReceipt(fallbackHtml);
+    if (btnPrint) {
+      btnPrint.disabled = false;
+      btnPrint.textContent = '🖨️ Imprimir ticket';
+    }
+    // Sin cuenta atrás: recargar cerraría el diálogo del sistema a medias.
+    return;
+  }
+
+  /* El pedido ya está cobrado y en cocina: lo único que falta es el papel,
+     así que se avisa sin alarmar y se deja reintentar. */
+  if (btnPrint) {
+    btnPrint.disabled = false;
+    btnPrint.textContent = '🔄 Reintentar impresión';
+  }
+  showPrintProblemNote();
+  startSuccessCountdown(SUCCESS_COUNTDOWN_PRINT_ERROR);
+}
+
+/* Aviso discreto bajo el botón: el número de pedido ya está en pantalla,
+   así que el personal puede darle el ticket a mano sin bloquear la cola. */
+function showPrintProblemNote() {
+  const btnPrint = $('btnPrintTicket');
+  if (!btnPrint) return;
+
+  let note = $('printProblemNote');
+  if (!note) {
+    note = document.createElement('p');
+    note.id = 'printProblemNote';
+    note.className = 'print-problem-note';
+    btnPrint.insertAdjacentElement('afterend', note);
+  }
+  note.textContent = '⚠️ La impresora no responde. Tu pedido está confirmado y ya está en cocina — enseña tu número al personal.';
+  note.hidden = false;
+}
+
+function hidePrintProblemNote() {
+  const note = $('printProblemNote');
+  if (note) note.hidden = true;
 }
 
 /* ─── IMPRESIÓN DE TICKET (iframe aislado, tamaño de ticket térmico) ───
-   Red de seguridad de printTicketSilently: se abre en un iframe aparte
-   (no la página entera) para que Admira no imprima el reproductor en
-   blanco por detrás, y se cierra solo al terminar. */
+   SOLO mantenimiento: abre el diálogo del sistema, así que no se llama en
+   el flujo normal del cliente (ver browserPrintAllowed). Se imprime en un
+   iframe aparte y no la página entera para que Admira no saque el
+   reproductor en blanco por detrás; se cierra solo al terminar. */
 function printReceipt(bodyHtml) {
   const existing = document.getElementById('print-frame');
   if (existing) existing.remove();
