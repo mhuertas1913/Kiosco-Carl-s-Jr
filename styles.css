@@ -1445,7 +1445,11 @@ dialog[open] {
 /* La barra superior derecha se mantiene: contiene el botón de configurar la
    carpeta de tickets y el enlace de vuelta a la demo. */
 .topbar-right { display:flex; }
-.cat-nav { gap:18px; padding:14px 0 18px; border-right:1px solid rgba(255,255,255,.22); background-color:#18191b; background-image:linear-gradient(90deg,rgba(255,255,255,.12),transparent 22%,rgba(0,0,0,.45)),linear-gradient(#5b5c5e,#202123 14%,#3c3d3f 78%,#151618); }
+.cat-nav { gap:18px; padding:14px 0 18px; border-right:1px solid rgba(255,255,255,.22); background-color:#18191b; background-image:linear-gradient(90deg,rgba(255,255,255,.12),transparent 22%,rgba(0,0,0,.45)),linear-gradient(#5b5c5e,#202123 14%,#3c3d3f 78%,#151618);
+  /* La regla del fondo de madera deja background-size en 220px, y como aqui
+     solo se cambia la imagen, el degradado se recortaba a 220px y se repetia
+     a lo alto: en el totem salian ocho franjas. Ocupa toda la altura. */
+  background-size:100% 100%,100% 100%; background-repeat:no-repeat; }
 .cat-tab,.cat-nav-ai { min-height:86px; justify-content:center; border-radius:0 17px 0 0; border:1px solid rgba(255,255,255,.56); border-left:0; background:linear-gradient(105deg,#525355 0%,#242527 15%,#555658 52%,#242527 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.8),0 5px 10px rgba(0,0,0,.3); color:#fff; font-family:var(--font-head); font-size:.85rem; letter-spacing:.01em; line-height:1; text-shadow:0 2px 2px #000; }
 .cat-tab .cat-icon { font-size:2rem; line-height:1; filter:drop-shadow(0 2px 1px #000); }
 .cat-tab.active { background:radial-gradient(ellipse at 50% 10%,rgba(255,110,120,.65),transparent 45%),linear-gradient(105deg,#8f1022,#e01832 45%,#860c1a); border-color:#ff7582; box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 20px rgba(238,0,30,.8),0 0 36px rgba(238,0,30,.36); }
@@ -1475,20 +1479,24 @@ dialog[open] {
 .quiz-q-title,.qr-title { font-family:var(--font-head); letter-spacing:.02em; }
 .quiz-option { min-height:170px; background:rgba(45,45,45,.78); border-color:rgba(220,220,220,.48); }
 .quiz-option:first-child { background:rgba(121,29,39,.7); border-color:#e65463; box-shadow:0 0 18px rgba(255,20,45,.4); }
-:root { --topbar-h:92px; --catnav-w:122px; } .product-grid { gap:46px 32px; padding:26px 32px 118px; } .pc-name { font-size:1.42rem; } .pc-desc { font-size:.95rem; }
+:root { --topbar-h:92px; --catnav-w:152px; } .product-grid { gap:46px 32px; padding:26px 32px 118px; } .pc-name { font-size:1.42rem; } .pc-desc { font-size:.95rem; }
 }
 
 
 /* V2 1080 x 1920 reference grid. */
 @media (min-width:900px) {
-  :root { --topbar-h:84px; --catnav-w:122px; }
-  .app { grid-template-columns:122px 1fr; grid-template-rows:84px 1fr; }
+  :root { --topbar-h:84px; --catnav-w:152px; }
+  .app { grid-template-columns:var(--catnav-w) 1fr; grid-template-rows:84px 1fr; }
   .topbar { height:84px; }
   .cat-nav { gap:29px; padding:0 0 18px; }
   .cat-tab,.cat-nav-ai { min-height:81px; height:81px; padding:7px 5px; }
   .cat-tab { font-size:.82rem; }
   .cat-tab .cat-icon { font-size:1.85rem; }
-  .product-grid { grid-template-columns:repeat(3,272px); justify-content:start; gap:45px 52px; padding:80px 20px 110px; }
+  /* minmax y no 272px fijos: con el rail mas ancho, tres columnas de 272
+     mas los gaps sumaban 960px en 928 de ancho util y desbordaban. Asi las
+     tarjetas se quedan en su tamano cuando cabe y ceden unos pixeles
+     cuando no, en vez de sacar la rejilla de la pantalla. */
+  .product-grid { grid-template-columns:repeat(3,minmax(0,272px)); justify-content:start; gap:45px 52px; padding:80px 20px 110px; }
   /* expositor/peana: los define el bloque unificado con podium-bg.png */
   .pc-body { padding:14px 10px 0; gap:8px; }
   .pc-name { font-size:1.35rem; line-height:1.05; }
@@ -1500,7 +1508,7 @@ dialog[open] {
   .main::after { height:40px; }
 
   /* INC-03: la ventana de detalle ocupa la mayor parte de la pantalla */
-  .product-dialog,.combo-dialog { width:min(96vw,1030px); max-width:none; max-height:92vh; max-height:92dvh; border-radius:0 0 34px 34px; background:#3a3a3a; border:2px solid #d84a58; box-shadow:0 0 0 5px rgba(100,0,10,.6),0 0 27px rgba(244,0,34,.7); }
+  .product-dialog,.combo-dialog { width:min(96vw,1030px); max-width:none; max-height:92vh; max-height:92dvh; border-radius:34px; background:#3a3a3a; border:2px solid #d84a58; box-shadow:0 0 0 5px rgba(100,0,10,.6),0 0 27px rgba(244,0,34,.7); }
   .product-dialog .pd-content,.combo-dialog .combo-content { background:linear-gradient(180deg,#111 0,#272727 15%,#3b3b3b 100%); }
   .pd-hero,.combo-hero { height:430px; background:radial-gradient(ellipse at 50% 50%,rgba(166,25,31,.7),transparent 36%),linear-gradient(#050505,#292929); }
   .pd-hero img,.combo-hero img { height:108%; width:108%; object-fit:contain; }
@@ -1711,7 +1719,11 @@ dialog[open] {
 
 /* Fotos reales dentro de las opciones grandes (individual / en combo).
    Se miden en em para seguir el tamaño del icono en cada resolución. */
-.choice-photo { width: 2em; height: 2em; object-fit: contain; display: block; }
+/* Va con .combo-opt delante a propósito: `.combo-opt img` tiene más
+   especificidad que una clase suelta y le imponía sus 92px del bloque de
+   kiosco, así que la foto de "Individual" salía más pequeña que la del
+   combo, que sí ganaba por llevar dos clases. */
+.combo-opt .choice-photo { width: 2.2em; height: 2.2em; object-fit: contain; display: block; }
 /* Misma altura reservada en las dos opciones: el montaje del combo es más
    alto que la hamburguesa sola y, sin esto, los textos quedaban a distinta
    altura en cada tarjeta. */
@@ -1722,8 +1734,10 @@ dialog[open] {
 /* El acompañamiento y la bebida van más pequeños y solapados: se lee como
    "la hamburguesa Y ademas esto", no como tres productos sueltos. */
 .choice-stack { display: flex; align-items: flex-end; justify-content: center; }
-.choice-stack .choice-stack-main { width: 2em; height: 2em; }
-.choice-stack .choice-stack-side { width: 1.15em; height: 1.15em; margin-left: -.18em; }
+/* La hamburguesa mide igual en las dos opciones: lo que cambia entre ellas
+   es lo que la acompaña, no su tamaño. */
+.choice-stack .choice-stack-main { width: 2.2em; height: 2.2em; }
+.choice-stack .choice-stack-side { width: 1.25em; height: 1.25em; margin-left: -.18em; }
 .choice-options-lg .combo-opt-label { font-size: 1.05rem; }
 .choice-options-lg .combo-opt-price { font-size: .82rem; }
 
@@ -1876,6 +1890,10 @@ dialog[open] {
   .pd-hero { height: clamp(130px, 25vh, 300px); }
   .combo-hero { height: clamp(110px, 21vh, 240px); }
   .combo-body, .pd-body { padding: 16px; gap: 14px; }
+  /* En el rail estrecho de móvil, "Hamburguesas" y "Complementos" no
+     entraban por 3px y quedaban cortadas: el texto va sin partir a
+     propósito, así que lo que cede es el cuerpo de letra. */
+  .cat-tab { font-size: .62rem; }
 }
 
 /* El carrito del tótem se ancla a 140px del borde y mide 1520px: en una

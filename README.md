@@ -30,7 +30,9 @@ un tótem. Las fotos recortadas están en `iconos/`.
   foto en `img`, y el emoji se queda en `icon` como respaldo si la imagen no
   carga. "Menús" usa `imgs` (hamburguesa + patatas + refresco) porque es justo
   lo que lo distingue de "Hamburguesas"; con una estrella se confundía con
-  "Infantil".
+  "Infantil". Todas las fotos son locales menos la de "Infantil", que todavía
+  se descarga de `carlsjr.es`: si el kiosco se queda sin red, esa cae al emoji
+  de respaldo.
 - **Individual / En combo**: cada opción enseña lo que se lleva de verdad — la
   hamburguesa elegida, y esa misma con las patatas y el refresco — para que la
   diferencia de precio se entienda sin leer.
@@ -55,6 +57,16 @@ El botón ♿ del final del rail de categorías baja toda la interfaz táctil (c
 El interruptor va anclado al fondo del rail y pegado (`position: sticky`) a propósito: es el único control que tiene que estar al alcance *antes* de activar el modo, así que no puede ir en la barra superior. La mitad de arriba se rellena con un telón de marca en vez de dejarse en negro.
 
 ## Resoluciones
+
+> Dos trampas del CSS que ya han mordido una vez, por si vuelven a aparecer:
+> **(1)** `background-size` no se hereda de la regla que definió la imagen. La
+> regla del fondo de madera fija `220px`, así que al cambiar solo
+> `background-image` en `.cat-nav` el degradado se recortaba a 220px y se
+> repetía: en el tótem salían ocho franjas horizontales.
+> **(2)** `.combo-opt img` (una clase + un elemento) gana a una clase suelta
+> como `.choice-photo`, así que las fotos nuevas necesitan `.combo-opt` delante
+> para no heredar los 92px del bloque de kiosco.
+
 
 El diseño está dimensionado para el tótem (1080×1920), pero funciona en cualquier resolución. Las medidas fijas del bloque de kiosko se reescalan con `clamp()` sobre `vh` en el nivel `@media (min-width: 900px) and (max-height: 1500px)` de `styles.css`: el tótem conserva exactamente sus tamaños (son los máximos de cada `clamp`) y el resto de pantallas se ajustan de forma continua.
 

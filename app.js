@@ -318,12 +318,12 @@ const PRODUCT_I18N = {
    "Menús" lleva las tres piezas juntas porque es justo lo que lo distingue
    de "Hamburguesas"; con una estrella se confundía con Infantil. */
 const CATEGORIES = [
-  { id: 'burgers',  label: 'Hamburguesas', icon: '🍔', img: 'https://carlsjr.es/wp-content/uploads/2023/03/Famous-Star.png' },
-  { id: 'combos',   label: 'Menús',        icon: '⭐', imgs: ['https://carlsjr.es/wp-content/uploads/2023/03/Famous-Star.png', './iconos/ic-papas.png', './iconos/ic-cocacola.png'] },
+  { id: 'burgers',  label: 'Hamburguesas', icon: '🍔', img: './burger.png' },
+  { id: 'combos',   label: 'Menús',        icon: '⭐', imgs: ['./burger.png', './iconos/ic-papas.png', './iconos/ic-cocacola.png'] },
   { id: 'sides',    label: 'Complementos', icon: '🍟', img: './iconos/ic-papas.png' },
   { id: 'desserts', label: 'Postres',      icon: '🥛', img: './iconos/ic-twist-oreo.png' },
   { id: 'drinks',   label: 'Bebidas',      icon: '🥤', img: './iconos/ic-cocacola.png' },
-  { id: 'salads',   label: 'Ensaladas',    icon: '🥗', img: 'https://carlsjr.es/wp-content/uploads/2023/03/Ensalada_crispy_plato_blanco_500x500px.png' },
+  { id: 'salads',   label: 'Ensaladas',    icon: '🥗', img: './ensalada.png' },
   { id: 'kids',     label: 'Infantil',     icon: '🌟', img: 'https://carlsjr.es/wp-content/uploads/2023/03/Bodegon_Menu_infantil_Bebidino_Hamburger_500x500px.png' }
 ];
 
