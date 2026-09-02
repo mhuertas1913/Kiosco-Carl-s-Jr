@@ -30,9 +30,9 @@ un tótem. Las fotos recortadas están en `iconos/`.
   foto en `img`, y el emoji se queda en `icon` como respaldo si la imagen no
   carga. "Menús" usa `imgs` (hamburguesa + patatas + refresco) porque es justo
   lo que lo distingue de "Hamburguesas"; con una estrella se confundía con
-  "Infantil". Todas las fotos son locales menos la de "Infantil", que todavía
-  se descarga de `carlsjr.es`: si el kiosco se queda sin red, esa cae al emoji
-  de respaldo.
+  "Infantil". Todas las fotos son locales, así que el rail no depende de
+  internet; si alguna faltara, esa categoría cae a su emoji de `icon` sin
+  romper nada.
 - **Individual / En combo**: cada opción enseña lo que se lleva de verdad — la
   hamburguesa elegida, y esa misma con las patatas y el refresco — para que la
   diferencia de precio se entienda sin leer.

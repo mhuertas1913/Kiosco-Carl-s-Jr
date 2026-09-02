@@ -324,7 +324,7 @@ const CATEGORIES = [
   { id: 'desserts', label: 'Postres',      icon: '🥛', img: './iconos/ic-twist-oreo.png' },
   { id: 'drinks',   label: 'Bebidas',      icon: '🥤', img: './iconos/ic-cocacola.png' },
   { id: 'salads',   label: 'Ensaladas',    icon: '🥗', img: './ensalada.png' },
-  { id: 'kids',     label: 'Infantil',     icon: '🌟', img: 'https://carlsjr.es/wp-content/uploads/2023/03/Bodegon_Menu_infantil_Bebidino_Hamburger_500x500px.png' }
+  { id: 'kids',     label: 'Infantil',     icon: '🌟', img: './infantil.png' }
 ];
 
 const MODIFIERS = [
