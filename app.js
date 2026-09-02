@@ -803,11 +803,25 @@ function bindA11yToggle() {
   const btn = $('btnA11yMode');
   if (!btn) return;
   btn.addEventListener('click', () => {
+    /* El carrito se abre y cierra deslizando en vertical, y al cambiar de
+       modo su posición de reposo pasa de estar por encima de la pantalla a
+       estar por debajo. Con la transición puesta, el panel cerrado hacía
+       todo ese recorrido a la vista: se veía cruzar un panel con el pedido
+       dentro y volver a esconderse. Se corta la transición mientras se
+       reordena y se devuelve en cuanto el navegador ha pintado la posición
+       nueva, para no perder la animación normal de abrir el carrito. */
+    document.body.classList.add('a11y-switching');
+
     const on = document.body.classList.toggle('a11y-lowered');
     btn.classList.toggle('is-on', on);
     btn.setAttribute('aria-pressed', String(on));
     const label = $('a11yLabel');
     if (label) label.textContent = on ? t('a11yRestore') : t('a11yLower');
+
+    // Dos frames: uno para que aplique la posición, otro para reactivar.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.body.classList.remove('a11y-switching');
+    }));
   });
 }
 
