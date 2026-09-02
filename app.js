@@ -312,14 +312,19 @@ const PRODUCT_I18N = {
   'mystery-carls':         { name: "Mystery Carl's",                  desc: "Surprise combo made just for you. The chef picks what suits you best today. Discover it when it hits your tray!" },
 };
 
+/* El rail usa la foto real del producto en vez de un emoji: es la marca y
+   se reconoce de un vistazo desde lejos, que es como se mira un tótem. El
+   emoji se queda como respaldo por si la imagen no carga (kiosco sin red).
+   "Menús" lleva las tres piezas juntas porque es justo lo que lo distingue
+   de "Hamburguesas"; con una estrella se confundía con Infantil. */
 const CATEGORIES = [
-  { id: 'burgers',  label: 'Hamburguesas', icon: '🍔' },
-  { id: 'combos',   label: 'Menús',        icon: '⭐' },
-  { id: 'sides',    label: 'Complementos', icon: '🍟' },
-  { id: 'desserts', label: 'Postres',      icon: '🥛' },
-  { id: 'drinks',   label: 'Bebidas',      icon: '🥤' },
-  { id: 'salads',   label: 'Ensaladas',    icon: '🥗' },
-  { id: 'kids',     label: 'Infantil',     icon: '🌟' }
+  { id: 'burgers',  label: 'Hamburguesas', icon: '🍔', img: 'https://carlsjr.es/wp-content/uploads/2023/03/Famous-Star.png' },
+  { id: 'combos',   label: 'Menús',        icon: '⭐', imgs: ['https://carlsjr.es/wp-content/uploads/2023/03/Famous-Star.png', './iconos/ic-papas.png', './iconos/ic-cocacola.png'] },
+  { id: 'sides',    label: 'Complementos', icon: '🍟', img: './iconos/ic-papas.png' },
+  { id: 'desserts', label: 'Postres',      icon: '🥛', img: './iconos/ic-twist-oreo.png' },
+  { id: 'drinks',   label: 'Bebidas',      icon: '🥤', img: './iconos/ic-cocacola.png' },
+  { id: 'salads',   label: 'Ensaladas',    icon: '🥗', img: 'https://carlsjr.es/wp-content/uploads/2023/03/Ensalada_crispy_plato_blanco_500x500px.png' },
+  { id: 'kids',     label: 'Infantil',     icon: '🌟', img: 'https://carlsjr.es/wp-content/uploads/2023/03/Bodegon_Menu_infantil_Bebidino_Hamburger_500x500px.png' }
 ];
 
 const MODIFIERS = [
@@ -398,7 +403,7 @@ const QUIZ = [
     opts: [
       { id: 'shake',  icon: '🥛', img: './iconos/ic-batido.png', label: 'Batido helado' },
       { id: 'ice',    icon: '🍦', img: './iconos/ic-helado.png', label: 'Twist Oreo' },
-      { id: 'none',   icon: '🙅', img: './iconos/ic-no.png',     label: 'Sin postre, gracias' }
+      { id: 'none',   icon: '🚫', img: './iconos/ic-sin.svg',     label: 'Sin postre, gracias' }
     ]
   }
 ];
@@ -470,8 +475,8 @@ const LANGS = {
     toastDcDone: '🏆 ¡Reto completado! +50 puntos', toastDcRepeat: '🏆 ¡Reto ya completado!',
     toastTicketSent: '📧 Ticket enviado a tu email',
     toastRegistered: '✅ ¡Registrado! Ticket enviado a tu email',
-    chooseDrink: '🥤 Elige tu bebida', chooseSide: '🍟 Elige tu acompañamiento',
-    chooseDessert: '🍦 ¿Y de postre?', customizeBurger: '🍔 Personaliza tu hamburguesa',
+    chooseDrink: 'Elige tu bebida', chooseSide: 'Elige tu acompañamiento',
+    chooseDessert: '¿Y de postre?', customizeBurger: 'Personaliza tu hamburguesa',
     comboTotalLabel: 'Total del combo', addCombo: 'Añadir combo —',
     completeYourOrder: '✨ Completa tu pedido', included: 'Incluido',
     orderSummaryTitle: 'Resumen del pedido',
@@ -576,8 +581,8 @@ const LANGS = {
     toastDcDone: '🏆 Challenge completed! +50 points', toastDcRepeat: '🏆 Challenge already completed!',
     toastTicketSent: '📧 Ticket sent to your email',
     toastRegistered: '✅ Registered! Ticket sent to your email',
-    chooseDrink: '🥤 Choose your drink', chooseSide: '🍟 Choose your side',
-    chooseDessert: '🍦 And for dessert?', customizeBurger: '🍔 Customize your burger',
+    chooseDrink: 'Choose your drink', chooseSide: 'Choose your side',
+    chooseDessert: 'And for dessert?', customizeBurger: 'Customize your burger',
     comboTotalLabel: 'Combo total', addCombo: 'Add combo —',
     completeYourOrder: '✨ Complete your order', included: 'Included',
     orderSummaryTitle: 'Order summary',
@@ -995,10 +1000,35 @@ const CAT_LABEL_KEYS = {
   desserts: 'catDesserts', drinks: 'catDrinks', salads: 'catSalads', kids: 'catKids'
 };
 
+/* Si la foto no carga se sustituye por el emoji de siempre, para que la
+   categoría nunca se quede sin icono. */
+const catIconHtml = c => {
+  if (c.imgs) {
+    return `<span class="cat-icon-stack">${c.imgs.map(src =>
+      `<img src="${src}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`
+    ).join('')}</span>`;
+  }
+  return c.img
+    ? `<img class="cat-icon-img" src="${c.img}" alt="" referrerpolicy="no-referrer"
+            onerror="this.replaceWith(document.createTextNode('${c.icon}'))">`
+    : c.icon;
+};
+
+/* Silla de ruedas dibujada en vez del emoji ♿: el emoji se ve distinto en
+   cada sistema y no sigue el color del botón, que aquí cambia al activarse.
+   Con currentColor el icono se enciende junto con el resto del botón. */
+const A11Y_ICON_SVG = `
+  <svg class="cat-nav-a11y-icon" viewBox="0 0 48 48" aria-hidden="true" fill="none"
+       stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="19" cy="7.5" r="4.5" fill="currentColor" stroke="none"/>
+    <path d="M18 15v10h10l5 10h7"/>
+    <circle cx="21" cy="31" r="11.5"/>
+  </svg>`;
+
 function renderCatNav() {
   $('catNav').innerHTML = CATEGORIES.map(c => `
     <button class="cat-tab ${c.id === state.cat ? 'active' : ''}" data-cat="${c.id}" type="button">
-      <span class="cat-icon">${c.icon}</span>
+      <span class="cat-icon">${catIconHtml(c)}</span>
       <span>${t(CAT_LABEL_KEYS[c.id]) || c.label}</span>
     </button>
   `).join('') + `
@@ -1009,7 +1039,7 @@ function renderCatNav() {
     <button class="cat-tab cat-nav-a11y ${a11yLowered() ? 'is-on' : ''}" id="btnA11yMode" type="button"
             aria-pressed="${a11yLowered()}"
             aria-label="Modo silla de ruedas: bajar el menú a la parte alcanzable de la pantalla">
-      <span class="cat-nav-a11y-icon" aria-hidden="true">♿</span>
+      ${A11Y_ICON_SVG}
       <span id="a11yLabel">${a11yLowered() ? t('a11yRestore') : t('a11yLower')}</span>
     </button>
   `;
@@ -1167,6 +1197,20 @@ function renderBurgerTypeDialog(p) {
   $('btComboLabel').textContent = t('burgerCombo');
   $('btSoloPrice').textContent = EUR.format(p.price);
   $('btComboPrice').textContent = `${EUR.format(p.price + BURGER_COMBO_SURCHARGE)} · ${t('burgerComboHint')}`;
+
+  /* En vez de dos emojis genéricos, cada opción enseña lo que se lleva de
+     verdad: la hamburguesa que acaba de elegir, y esa misma con las patatas
+     y el refresco. Así la diferencia de precio se entiende sin leer. */
+  const foto = (src, alt, extraClass = '') =>
+    `<img class="choice-photo ${extraClass}" src="${src}" alt="${alt}" referrerpolicy="no-referrer" onerror="this.remove()">`;
+
+  $('btSoloIcon').innerHTML = p.img ? foto(p.img, pName(p)) : '🍔';
+  $('btComboIcon').innerHTML = `
+    <span class="choice-stack">
+      ${p.img ? foto(p.img, pName(p), 'choice-stack-main') : ''}
+      ${foto('./iconos/ic-papas.png', '', 'choice-stack-side')}
+      ${foto('./iconos/ic-cocacola.png', '', 'choice-stack-side')}
+    </span>`;
 }
 
 function openBurgerTypeDialog(product) {
@@ -1530,7 +1574,7 @@ function getQuiz() {
     { id: 'sweet', q: t('q5'), opts: [
       { id: 'shake', icon: '🥛', img: './iconos/ic-batido.png', label: t('q5o1') },
       { id: 'ice', icon: '🍦', img: './iconos/ic-helado.png', label: t('q5o2') },
-      { id: 'none', icon: '🙅', img: './iconos/ic-no.png', label: t('q5o3') }
+      { id: 'none', icon: '🚫', img: './iconos/ic-sin.svg', label: t('q5o3') }
     ]}
   ];
 }
@@ -2348,7 +2392,7 @@ const CUP_IMGS = {
 };
 
 const DRINKS_OPTIONS = [
-  { id: 'none',       label: 'Sin bebida',       labelEn: 'No drink',        icon: '🙅', img: './iconos/ic-no.png', extra: 0,    retail: 0    },
+  { id: 'none',       label: 'Sin bebida',       labelEn: 'No drink',        icon: '🚫', img: './iconos/ic-sin.svg', extra: 0,    retail: 0    },
   { id: 'coca-cola',  label: 'Coca-Cola',         labelEn: 'Coca-Cola',       icon: '🥤', img: CUP_IMGS['coca-cola'], extra: 0,    retail: 49 },
   { id: 'fanta',      label: 'Fanta Naranja',     labelEn: 'Fanta Orange',    icon: '🟠', img: CUP_IMGS['fanta'],     extra: 0,    retail: 49 },
   { id: 'sprite',     label: 'Sprite',            labelEn: 'Sprite',          icon: '💚', img: CUP_IMGS['sprite'],    extra: 0,    retail: 49 },
@@ -2366,7 +2410,7 @@ const COFFEE_OPTIONS = [
 ];
 
 const SIDES_OPTIONS = [
-  { id: 'none',       label: 'Sin acompañamiento', labelEn: 'No side',         icon: '🙅', img: './iconos/ic-no.png', extra: 0,    retail: 0    },
+  { id: 'none',       label: 'Sin acompañamiento', labelEn: 'No side',         icon: '🚫', img: './iconos/ic-sin.svg', extra: 0,    retail: 0    },
   { id: 'crisscuts',  label: 'Crisscuts',          labelEn: 'Crisscuts',       icon: '🍟', img: './iconos/ic-crisscuts.png', extra: 0,    retail: 65 },
   { id: 'fries',      label: 'Patatas Fritas',     labelEn: 'French Fries',    icon: '🍟', img: './iconos/ic-papas.png', extra: 0,    retail: 55 },
   { id: 'nuggets',    label: 'Chicken Nuggets',    labelEn: 'Chicken Nuggets', icon: '🍗', img: './iconos/ic-nuggets.png', extra: 0,    retail: 75 },
@@ -2374,7 +2418,7 @@ const SIDES_OPTIONS = [
 ];
 
 const DESSERT_OPTIONS = [
-  { id: 'none',        label: 'Sin postre',       labelEn: 'No dessert',       icon: '🙅', img: './iconos/ic-no.png', extra: 0 },
+  { id: 'none',        label: 'Sin postre',       labelEn: 'No dessert',       icon: '🚫', img: './iconos/ic-sin.svg', extra: 0 },
   { id: 'twist-oreo',  label: 'Twist Oreo',       labelEn: 'Twist Oreo',       icon: '🍦', img: './iconos/ic-twist-oreo.png', extra: 65 },
   { id: 'shake-oreo',  label: 'Shake Oreo',       labelEn: 'Oreo Shake',       icon: '🥛', img: './iconos/ic-shake-oreo.png', extra: 85 },
   { id: 'shake-choc',  label: 'Shake Chocolate',  labelEn: 'Chocolate Shake',  icon: '🍫', img: './iconos/ic-shake-chocolate.png', extra: 85 },
@@ -2417,14 +2461,8 @@ function openMysteryConfigurator(product) {
         <h3>${t('mysteryChooseDrink')} <span class="combo-required">*</span></h3>
         <div class="combo-options">${drinkHtml}</div>
       </div>
-      <div class="pd-qty-row">
-        <span class="pd-qty-label">${t('quantity')}</span>
-        <div class="pd-qty-ctrl">
-          <button class="pd-qty-btn" id="comboQtyMinus" type="button">−</button>
-          <span class="pd-qty-val" id="comboQtyVal">1</span>
-          <button class="pd-qty-btn" id="comboQtyPlus" type="button">+</button>
-        </div>
-      </div>
+      <!-- Sin selector de cantidad, igual que en el configurador: debajo de
+           "elige tu bebida" se lee como si contara bebidas. -->
     </div>
     <div class="combo-footer">
       <div class="combo-total-row">
@@ -2444,8 +2482,6 @@ function openMysteryConfigurator(product) {
       $('comboContent').querySelectorAll('[data-drink]').forEach(b => b.classList.toggle('selected', b.dataset.drink === btn.dataset.drink));
     });
   });
-  $('comboQtyMinus').addEventListener('click', () => { if (comboState.qty > 1) { comboState.qty--; updateComboPrices(); } });
-  $('comboQtyPlus').addEventListener('click',  () => { if (comboState.qty < 9) { comboState.qty++; updateComboPrices(); } });
   $('btnAddCombo').addEventListener('click', () => {
     if (!comboState.drink) return;
     const note = `Bebida: ${comboState.drink.label} · 🎲 Sorpresa`;
@@ -2613,17 +2649,10 @@ function renderComboDialog() {
       <div class="combo-steps-dots">${dotsHtml}</div>
 
       <div class="combo-section combo-step-section">${stepSection}</div>
-
-      ${isLast ? `
-        <div class="pd-qty-row">
-          <span class="pd-qty-label">${t('quantity')}</span>
-          <div class="pd-qty-ctrl">
-            <button class="pd-qty-btn" id="comboQtyMinus" type="button">−</button>
-            <span class="pd-qty-val" id="comboQtyVal">${comboState.qty}</span>
-            <button class="pd-qty-btn" id="comboQtyPlus" type="button">+</button>
-          </div>
-        </div>
-      ` : ''}
+      <!-- Sin selector de cantidad: el último paso es "elige tu bebida" o
+           "elige tu postre", y un contador justo debajo se lee como si
+           multiplicara la bebida, no el menú entero. Las unidades se
+           cambian en el carrito, que es donde se ve qué se está sumando. -->
     </div>
     <div class="combo-footer">
       <div class="combo-total-row">
@@ -2697,11 +2726,7 @@ function renderComboDialog() {
     });
   }
 
-  // Bind qty (solo existe en el último paso)
   if (isLast) {
-    $('comboQtyMinus').addEventListener('click', () => { if (comboState.qty > 1) { comboState.qty--; updateComboPrices(); } });
-    $('comboQtyPlus').addEventListener('click',  () => { if (comboState.qty < 9) { comboState.qty++; updateComboPrices(); } });
-
     $('btnAddCombo').addEventListener('click', () => {
       if (!comboReady()) return;
       // Solo se anota lo que el cliente ha elegido de verdad

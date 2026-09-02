@@ -20,6 +20,34 @@ La interfaz está pensada para mostrarse en una pantalla de cartelería digital.
 
    > Operativa: hay que tener los cartelitos numerados junto al tótem. Si nadie toca nada en 30 segundos, el pedido sale como recogida en mostrador — está cobrado y no puede quedarse sin mandar a cocina.
 
+## Iconos
+
+Los iconos son la foto real del producto siempre que exista, no emojis: es la
+imagen de la marca y se reconoce de un vistazo desde lejos, que es como se mira
+un tótem. Las fotos recortadas están en `iconos/`.
+
+- **Rail de categorías** (`CATEGORIES` en `app.js`): cada categoría lleva su
+  foto en `img`, y el emoji se queda en `icon` como respaldo si la imagen no
+  carga. "Menús" usa `imgs` (hamburguesa + patatas + refresco) porque es justo
+  lo que lo distingue de "Hamburguesas"; con una estrella se confundía con
+  "Infantil".
+- **Individual / En combo**: cada opción enseña lo que se lleva de verdad — la
+  hamburguesa elegida, y esa misma con las patatas y el refresco — para que la
+  diferencia de precio se entienda sin leer.
+- **Sin dibujo posible** (sin bebida/acompañamiento/postre, comer aquí, para
+  llevar, recoger, servicio a mesa y accesibilidad): iconos SVG dibujados. Van
+  con `currentColor`, así que se encienden en amarillo al seleccionarse, cosa
+  que un emoji no hace. Ojo: dentro de un `<button>`, `currentColor` hereda el
+  negro del navegador y no el color del texto, por eso `.choice-icon-svg` fija
+  el color a mano.
+
+## Cantidades
+
+Los pasos de "elige tu bebida" y "elige tu postre" no llevan selector de
+cantidad: un contador justo debajo se lee como si multiplicara la bebida y no
+el menú entero. Las unidades se cambian en el carrito, que es donde se ve qué
+se está sumando.
+
 ## Accesibilidad
 
 El botón ♿ del final del rail de categorías baja toda la interfaz táctil (carta, diálogos y carrito) a la **mitad inferior** de la pantalla, para que sea alcanzable desde una silla de ruedas: en el tótem vertical de 1080×1920 la parte de arriba queda fuera del alcance de alguien sentado.

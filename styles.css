@@ -330,6 +330,18 @@ a { -webkit-tap-highlight-color: transparent; }
   white-space: nowrap; transition: all .18s; text-align: center;
 }
 .cat-tab .cat-icon { font-size: 1.4rem; }
+/* La foto se mide en em para que herede el tamaño que cada resolución ya
+   le da al icono de la categoría, sin repetir la escala en cada nivel. */
+.cat-icon-img {
+  display: block;
+  width: 1.5em; height: 1.5em;
+  object-fit: contain;
+}
+/* "Menús": las tres piezas juntas, la principal grande y las otras dos
+   pequeñas y solapadas para que a tamaño de rail no se vuelva papilla. */
+.cat-icon-stack { display: flex; align-items: flex-end; justify-content: center; }
+.cat-icon-stack img { width: .95em; height: .95em; object-fit: contain; margin-left: -.1em; }
+.cat-icon-stack img:first-child { width: 1.45em; height: 1.45em; margin-left: 0; }
 .cat-tab.active {
   background: linear-gradient(180deg, #b32d3f 0%, #8a1f2d 55%, #7a1c26 100%);
   border-color: #d94a5c;
@@ -1687,6 +1699,31 @@ dialog[open] {
   text-align: center; font-size: 1rem;
 }
 .choice-options-lg .combo-opt-icon { font-size: 2.6rem; }
+
+/* Comer aquí / para llevar / recoger / a la mesa no tienen foto posible, así
+   que van dibujados. Al usar currentColor siguen el color de la opción, cosa
+   que un emoji no hace: se encienden en amarillo al quedar seleccionada. */
+/* El color se fija aquí a propósito: dentro de un <button> currentColor
+   hereda el negro del navegador, no el color del texto de la tarjeta, y el
+   icono desaparecía sobre el fondo oscuro. */
+.choice-icon-svg { width: 1.9em; height: 1.9em; display: block; color: #ddd; }
+.combo-opt.selected .choice-icon-svg { color: var(--yellow); }
+
+/* Fotos reales dentro de las opciones grandes (individual / en combo).
+   Se miden en em para seguir el tamaño del icono en cada resolución. */
+.choice-photo { width: 2em; height: 2em; object-fit: contain; display: block; }
+/* Misma altura reservada en las dos opciones: el montaje del combo es más
+   alto que la hamburguesa sola y, sin esto, los textos quedaban a distinta
+   altura en cada tarjeta. */
+#btSoloIcon, #btComboIcon {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 2.1em;
+}
+/* El acompañamiento y la bebida van más pequeños y solapados: se lee como
+   "la hamburguesa Y ademas esto", no como tres productos sueltos. */
+.choice-stack { display: flex; align-items: flex-end; justify-content: center; }
+.choice-stack .choice-stack-main { width: 2em; height: 2em; }
+.choice-stack .choice-stack-side { width: 1.15em; height: 1.15em; margin-left: -.18em; }
 .choice-options-lg .combo-opt-label { font-size: 1.05rem; }
 .choice-options-lg .combo-opt-price { font-size: .82rem; }
 
@@ -1900,7 +1937,9 @@ dialog[open] {
      exigible para poder volver a subir el menú. */
   position: sticky; bottom: 0; z-index: 2;
 }
-.cat-nav-a11y-icon { font-size: 1.6rem; line-height: 1; }
+/* El icono es un SVG que sigue a currentColor, así que se enciende solo
+   cuando el botón pasa a amarillo. Se mide en em como el resto del rail. */
+.cat-nav-a11y-icon { font-size: 1.6rem; line-height: 1; width: 1.35em; height: 1.35em; display: block; }
 /* Tres clases para ganarle al :hover genérico de .cat-tab, que si no
    apagaba el amarillo del estado activo. */
 .cat-tab.cat-nav-a11y.is-on {

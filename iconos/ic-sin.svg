@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- "Sin nada": simbolo de prohibido, neutro y legible a distancia. -->
+  <circle cx="32" cy="32" r="23" fill="none" stroke="#cfd4dc" stroke-width="6"/>
+  <line x1="16" y1="48" x2="48" y2="16" stroke="#cfd4dc" stroke-width="6" stroke-linecap="round"/>
+</svg>
