@@ -391,10 +391,14 @@ a { -webkit-tap-highlight-color: transparent; }
 }
 
 /* PRODUCT CARD */
+/* Caja semitransparente y borde tenue: sin nada que delimitara cada
+   producto, el + de una tarjeta parecia pertenecer a la foto de debajo,
+   porque queda mas cerca de esa que de su propio precio. */
 .product-card {
-  background: transparent;
+  background: rgba(255, 255, 255, .05);
   border-radius: var(--radius);
-  border: 1.5px solid transparent;
+  border: 1.5px solid rgba(255, 255, 255, .13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
   overflow: visible;
   display: flex; flex-direction: column;
   transition: transform .18s, border-color .18s, box-shadow .18s;
@@ -1450,22 +1454,25 @@ dialog[open] {
      solo se cambia la imagen, el degradado se recortaba a 220px y se repetia
      a lo alto: en el totem salian ocho franjas. Ocupa toda la altura. */
   background-size:100% 100%,100% 100%; background-repeat:no-repeat; }
-.cat-tab,.cat-nav-ai { min-height:86px; justify-content:center; border-radius:0 17px 0 0; border:1px solid rgba(255,255,255,.56); border-left:0; background:linear-gradient(105deg,#525355 0%,#242527 15%,#555658 52%,#242527 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.8),0 5px 10px rgba(0,0,0,.3); color:#fff; font-family:var(--font-head); font-size:.85rem; letter-spacing:.01em; line-height:1; text-shadow:0 2px 2px #000; }
-/* 3rem y no 2rem: dentro de cajas de 165px el icono a 2rem se quedaba
+.cat-tab,.cat-nav-ai { min-height:86px; justify-content:center; border-radius:0 17px 0 0; border:1px solid rgba(255,255,255,.56); border-left:0; background:linear-gradient(105deg,#525355 0%,#242527 15%,#555658 52%,#242527 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.8),0 5px 10px rgba(0,0,0,.3); color:#fff; font-family:var(--font-head); font-size:1.15rem; letter-spacing:.01em; line-height:1; text-shadow:0 2px 2px #000; }
+/* 3.6rem y no 2rem: dentro de cajas de 165px el icono pequeno se quedaba
    flotando en medio de mucho hueco. */
-.cat-tab .cat-icon { font-size:3rem; line-height:1; filter:drop-shadow(0 2px 1px #000); }
+.cat-tab .cat-icon { font-size:3.6rem; line-height:1; filter:drop-shadow(0 2px 1px #000); }
 .cat-tab.active { background:radial-gradient(ellipse at 50% 10%,rgba(255,110,120,.65),transparent 45%),linear-gradient(105deg,#8f1022,#e01832 45%,#860c1a); border-color:#ff7582; box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 20px rgba(238,0,30,.8),0 0 36px rgba(238,0,30,.36); }
 .cat-nav-ai { margin-top:0; background:radial-gradient(ellipse at 50% 35%,#fff26d 0%,#d8b91c 36%,#5f5510 82%); border-color:#fff35a; color:#090909; box-shadow:inset 0 0 12px rgba(255,255,255,.75),0 0 12px #f0e91a,0 0 28px rgba(240,233,26,.65); text-shadow:none; }
-.cat-nav-ai-sparkle { font-size:2.8rem; }
+.cat-nav-ai-sparkle { font-size:3.4rem; }
 .main { position:relative; }
 .main::after { content:''; position:fixed; z-index:39; left:0; right:0; bottom:0; height:36px; pointer-events:none; background:linear-gradient(176deg,#b9babd 0%,#303235 12%,#121315 48%,#606266 70%,#121315 100%); border-top:1px solid rgba(255,255,255,.65); box-shadow:0 -8px 20px rgba(0,0,0,.8); }
 .product-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:40px 26px; padding:24px 28px 116px; }
 .product-card { min-width:0; }
-.product-card:hover { border-color:transparent; box-shadow:none; transform:translateY(-4px); }
+/* El borde no desaparece al tocar: es lo que delimita el producto. */
+.product-card:hover { border-color:rgba(255,255,255,.3); box-shadow:inset 0 1px 0 rgba(255,255,255,.08); transform:translateY(-4px); }
 /* expositor y peana: los define el bloque unificado con podium-bg.png (arriba) */
 .pc-img img { filter:drop-shadow(0 12px 8px rgba(0,0,0,.76)); }
 .pc-podium-stars { position:relative; z-index:1; gap:0; letter-spacing:-2px; }
-.pc-body { padding:13px 10px 0; gap:7px; }
+/* Relleno inferior ahora que la tarjeta tiene fondo: sin el, el precio y
+   el + quedaban pegados al borde de la caja. */
+.pc-body { padding:13px 14px 16px; gap:7px; }
 .pc-name { font-size:1.3rem; line-height:1.04; font-weight:800; }
 .pc-desc { min-height:52px; font-size:.88rem; line-height:1.2; color:#f1f1f1; }
 .pc-footer { margin-top:8px; }
@@ -1671,15 +1678,20 @@ dialog[open] {
    Se quita la fuente de titulares (muy gruesa a este tamaño), se suaviza
    la sombra del texto y se bajan los halos de luz. */
 @media (min-width: 900px) {
+  /* Este bloque es el que manda en el rail por encima del anterior: en
+     pantallas de mas de 1500px de alto (el totem) no hay ningun nivel
+     posterior que lo pise. Los tamanos van acompasados a las cajas de
+     165px; en pantallas mas bajas manda el nivel con clamp() de mas abajo
+     y todo se queda pequeno. */
   .cat-tab, .cat-nav-ai {
     font-family: var(--font);
     font-weight: 600;
-    font-size: .78rem;
+    font-size: 1.15rem;
     letter-spacing: .02em;
     text-shadow: 0 1px 1px rgba(0,0,0,.75);
   }
   .cat-tab .cat-icon, .cat-nav-ai-sparkle {
-    font-size: 1.65rem;
+    font-size: 3.6rem;
     filter: none;
   }
   .cat-tab.active {
@@ -1992,10 +2004,20 @@ dialog[open] {
 .cat-nav-ai { margin-top: 0; }
 
 @media (min-width: 900px) {
-  /* Misma altura que el resto de cajas del rail: es un boton mas de la
-     barra y quedaba raro siendo la mitad de alto que sus vecinos. */
-  .cat-nav-a11y { min-height: 165px; height: auto; padding: 10px 6px; }
-  .cat-nav-a11y-icon { font-size: 2.6rem; }
+  /* Sigue la misma escala que las cajas de categoría: este bloque es el
+     último del archivo y gana en todas las pantallas, así que aquí van los
+     valores de pantalla normal y el tamaño grande del tótem va en el bloque
+     de abajo, acotado por altura. Con 165px fijos aquí, en un portátil el
+     botón salía a 165 mientras sus vecinas median 63 y el rail desbordaba. */
+  .cat-nav-a11y { min-height: clamp(46px, 8vh, 86px); height: auto; padding: 10px 6px; }
+  .cat-nav-a11y-icon { font-size: clamp(1.1rem, 2.4vh, 2.1rem); }
+}
+
+/* Pantallas altas (el tótem): el rail usa cajas de 165px y el botón de
+   accesibilidad es una caja más, así que mide lo mismo que sus vecinas. */
+@media (min-width: 900px) and (min-height: 1501px) {
+  .cat-nav-a11y { min-height: 165px; }
+  .cat-nav-a11y-icon { font-size: 3.2rem; }
 }
 
 body.a11y-lowered #app {
