@@ -1,8 +1,61 @@
-# Kiosco Carl’s Jr.
+# Kiosco Carl's Jr.
 
-Kiosco táctil para la selección de productos y generación de pedidos de Carl’s Jr.
+Kiosco táctil para la selección de productos y generación de pedidos de Carl's Jr.
 
-La interfaz está pensada para mostrarse en una pantalla de cartelería digital. El cliente selecciona productos, personaliza su pedido y, al finalizar, puede generar e imprimir su ticket.
+La interfaz está pensada para un tótem vertical de **1080×1920**. El cliente elige productos, personaliza su pedido, paga y, al terminar, puede imprimir su ticket. Los pedidos llegan a la pantalla de cocina en tiempo real.
+
+No hay compilación ni dependencias: es HTML, CSS y JavaScript servidos tal cual.
+
+---
+
+## Estructura del repositorio
+
+```
+├── index.html          Portada de la demo
+├── kiosk.html          El kiosco: es la pantalla del tótem
+├── kds.html            Pantalla de cocina (Kitchen Display System)
+├── customer.html       Pantalla de estado de pedidos para el público
+├── app.js              Toda la lógica del kiosco
+├── sync.js             Sincronización kiosco ↔ cocina ↔ cliente (Firebase)
+├── styles.css          Todos los estilos
+│
+├── print-helper.js     Ayudante local de impresión (Node, en el PC del kiosco)
+├── abrir-kiosco.bat    Arranca el ayudante
+├── iniciar-impresora.vbs   Lo lanza sin ventana
+├── instalar-inicio-automatico.bat   Arranque automático al iniciar sesión
+│
+├── assets/             Todo lo que carga la aplicación
+│   ├── fondos/         Fondos de pantalla y el expositor de los productos
+│   ├── iconos/         Iconos recortados de las láminas de la marca
+│   ├── marca/          Logotipos y estrellas
+│   ├── pago/           Iconos de los métodos de pago
+│   ├── productos/      Fotos de producto propias
+│   └── promos/         Vídeos e imágenes del carrusel de espera
+│
+├── referencias/        Material de origen que la aplicación NO usa
+│   ├── fotos-v2/       Las 28 fotos de referencia del diseño
+│   └── *.png           Láminas originales de las que se recortaron los iconos
+│
+└── stripe-worker/      Cloudflare Worker con el backend de Stripe
+```
+
+**El HTML, el CSS, el JS y los `.bat`/`.vbs` se quedan en la raíz a propósito**: la URL que tiene configurada el tótem y la tarea programada de Windows apuntan ahí, y moverlos las rompería.
+
+## Levantarlo en local
+
+Cualquier servidor estático sobre la carpeta del proyecto. Con Node:
+
+```
+npx serve -l 5500 .
+```
+
+- Kiosco: <http://localhost:5500/kiosk.html>
+- Cocina: <http://localhost:5500/kds.html>
+- Pantalla de cliente: <http://localhost:5500/customer.html>
+
+Para probar la impresión hace falta además el ayudante local (ver *Impresión de tickets*).
+
+---
 
 ## Flujo del pedido
 
@@ -12,72 +65,71 @@ La interfaz está pensada para mostrarse en una pantalla de cartelería digital.
    - *Individual*: precio de carta; bebida, acompañamiento y postre son opcionales y se cobran a precio suelto.
    - *En combo*: recargo fijo de **$70** (constante `BURGER_COMBO_SURCHARGE` en `app.js`) que incluye patatas y bebida a elegir, con suplemento solo en las mejoras (Monster, aros de cebolla). Es la misma diferencia que ya tenían los Menús de la carta respecto a su hamburguesa suelta ($169 → $239, $189 → $259, $159 → $229), así que los precios cuadran entre las dos formas de pedir.
 
-   Una hamburguesa pasada a combo se llama **“Menú &lt;hamburguesa&gt;”** en carrito, resumen, ticket y cocina, para que el mismo pedido no aparezca de dos formas distintas según por dónde se haya pedido.
+   Una hamburguesa pasada a combo se llama **"Menú &lt;hamburguesa&gt;"** en carrito, resumen, ticket y cocina, para que el mismo pedido no aparezca de dos formas distintas según por dónde se haya pedido.
 
 3. **Pago.**
 
-4. **Recoger o servir en mesa.** Después de pagar, y solo si el cliente come en el local, elige si lo recoge él o se lo llevamos. Si elige mesa, teclea en un teclado numérico el número del **cartelito que coge junto al kiosco** (1–99), igual que en McDonald's. Ese número aparece en el resguardo, en el ticket a doble tamaño (`MESA 42`) y en el KDS como etiqueta azul, que es lo que necesita quien lleva la bandeja.
+4. **Recoger o servir en mesa.** Después de pagar, y solo si el cliente come en el local, elige si lo recoge él o se lo llevamos. Si elige mesa, teclea en un teclado numérico el número del **cartelito que coge junto al kiosco** (1–99), igual que en McDonald's. Ese número aparece en el resguardo como **`Mesa 12`** destacado —es lo que el cliente tiene que recordar y lo que le preguntará quien lleve la bandeja—, en el ticket a doble tamaño y en el KDS como etiqueta azul.
 
    > Operativa: hay que tener los cartelitos numerados junto al tótem. Si nadie toca nada en 30 segundos, el pedido sale como recogida en mostrador — está cobrado y no puede quedarse sin mandar a cocina.
 
-## Iconos
-
-Los iconos son la foto real del producto siempre que exista, no emojis: es la
-imagen de la marca y se reconoce de un vistazo desde lejos, que es como se mira
-un tótem. Las fotos recortadas están en `iconos/`.
-
-- **Rail de categorías** (`CATEGORIES` en `app.js`): cada categoría lleva su
-  foto en `img`, y el emoji se queda en `icon` como respaldo si la imagen no
-  carga. "Menús" usa `imgs` (hamburguesa + patatas + refresco) porque es justo
-  lo que lo distingue de "Hamburguesas"; con una estrella se confundía con
-  "Infantil". Todas las fotos son locales, así que el rail no depende de
-  internet; si alguna faltara, esa categoría cae a su emoji de `icon` sin
-  romper nada.
-- **Individual / En combo**: cada opción enseña lo que se lleva de verdad — la
-  hamburguesa elegida, y esa misma con las patatas y el refresco — para que la
-  diferencia de precio se entienda sin leer.
-- **Sin dibujo posible** (sin bebida/acompañamiento/postre, comer aquí, para
-  llevar, recoger, servicio a mesa y accesibilidad): iconos SVG dibujados. Van
-  con `currentColor`, así que se encienden en amarillo al seleccionarse, cosa
-  que un emoji no hace. Ojo: dentro de un `<button>`, `currentColor` hereda el
-  negro del navegador y no el color del texto, por eso `.choice-icon-svg` fija
-  el color a mano.
-
 ## Cantidades
 
-Los pasos de "elige tu bebida" y "elige tu postre" no llevan selector de
-cantidad: un contador justo debajo se lee como si multiplicara la bebida y no
-el menú entero. Las unidades se cambian en el carrito, que es donde se ve qué
-se está sumando.
+Los pasos de "elige tu bebida" y "elige tu postre" no llevan selector de cantidad: un contador justo debajo se lee como si multiplicara la bebida y no el menú entero. Las unidades se cambian en el carrito, que es donde se ve qué se está sumando.
+
+---
+
+## Iconos y fotos
+
+Los iconos son la foto real del producto siempre que exista, no emojis: es la imagen de la marca y se reconoce de un vistazo desde lejos, que es como se mira un tótem. Los recortes están en `assets/iconos/`.
+
+- **Rail de categorías** (`CATEGORIES` en `app.js`): cada categoría lleva su foto en `img`, y el emoji se queda en `icon` como respaldo si la imagen no carga. "Menús" usa `imgs` (hamburguesa + patatas + refresco) porque es justo lo que lo distingue de "Hamburguesas"; con una estrella se confundía con "Infantil". Todas las fotos son locales, así que el rail no depende de internet.
+- **Individual / En combo**: cada opción enseña lo que se lleva de verdad — la hamburguesa elegida, y esa misma con las patatas y el refresco — para que la diferencia de precio se entienda sin leer.
+- **Sin dibujo posible** (sin bebida/acompañamiento/postre, comer aquí, para llevar, recoger, servicio a mesa y accesibilidad): iconos SVG dibujados. Van con `currentColor`, así que se encienden en amarillo al seleccionarse, cosa que un emoji no hace. Ojo: dentro de un `<button>`, `currentColor` hereda el negro del navegador y no el color del texto, por eso `.choice-icon-svg` fija el color a mano.
+
+### Apoyo de las fotos en el expositor
+
+Cada foto de la carta trae **distinto margen transparente por debajo**: del 5,6 % de los cafés al 32,8 % de los Crisscuts. Como todas se dibujan en una caja del mismo alto y alineadas abajo, el producto quedaba a alturas muy distintas respecto a la peana — la mayoría hundido dentro de ella y unos pocos flotando por encima.
+
+`TRAY_OFFSET` en `app.js` guarda, por producto, cuánto hay que desplazar su foto para que todas apoyen a la misma altura, en % de su propio alto. La referencia es The Big Carl.
+
+> **Mantenimiento:** esto no se puede calcular en caliente porque las fotos de carta vienen de `carlsjr.es` **sin cabecera CORS**, y el navegador no deja leer sus píxeles. Si se cambia una foto de la carta hay que volver a medirla y actualizar su valor. Un producto que no esté en la tabla sale con `0`, sin romper nada.
+
+---
 
 ## Accesibilidad
 
-El botón ♿ del final del rail de categorías baja toda la interfaz táctil (carta, diálogos y carrito) a la **mitad inferior** de la pantalla, para que sea alcanzable desde una silla de ruedas: en el tótem vertical de 1080×1920 la parte de arriba queda fuera del alcance de alguien sentado.
+El botón ♿ del final del rail de categorías baja toda la interfaz táctil (carta, diálogos y carrito) a la **mitad inferior** de la pantalla, para que sea alcanzable desde una silla de ruedas: en el tótem vertical la parte de arriba queda fuera del alcance de alguien sentado.
 
 El interruptor va anclado al fondo del rail y pegado (`position: sticky`) a propósito: es el único control que tiene que estar al alcance *antes* de activar el modo, así que no puede ir en la barra superior. La mitad de arriba se rellena con un telón de marca en vez de dejarse en negro.
 
+**En este modo todo baja de escala** (bloque `body.a11y-lowered` al final de `styles.css`), porque los tamaños del tótem metidos en una banda de 48 % de alto obligaban a arrastrar hasta 581 px dentro de una ventana pequeña — justo en el modo pensado para no tener que estirarse. Los diálogos caben ahora enteros sin deslizar, y el rail pasa de 165 a 118 px por caja. No se busca hacerlo todo diminuto: los diálogos ocupan ~880 px de los 918 disponibles, es decir, lo más grandes que caben sin scroll.
+
+Al cambiar de modo se corta un instante la transición del carrito (`a11y-switching`, en `bindA11yToggle`): su posición de reposo salta de encima a debajo de la pantalla y, con la animación puesta, el panel cerrado cruzaba la pantalla a la vista.
+
 ## Resoluciones
 
-> Dos trampas del CSS que ya han mordido una vez, por si vuelven a aparecer:
-> **(1)** `background-size` no se hereda de la regla que definió la imagen. La
-> regla del fondo de madera fija `220px`, así que al cambiar solo
-> `background-image` en `.cat-nav` el degradado se recortaba a 220px y se
-> repetía: en el tótem salían ocho franjas horizontales.
-> **(2)** `.combo-opt img` (una clase + un elemento) gana a una clase suelta
-> como `.choice-photo`, así que las fotos nuevas necesitan `.combo-opt` delante
-> para no heredar los 92px del bloque de kiosco.
-
-
-El diseño está dimensionado para el tótem (1080×1920), pero funciona en cualquier resolución. Las medidas fijas del bloque de kiosko se reescalan con `clamp()` sobre `vh` en el nivel `@media (min-width: 900px) and (max-height: 1500px)` de `styles.css`: el tótem conserva exactamente sus tamaños (son los máximos de cada `clamp`) y el resto de pantallas se ajustan de forma continua.
+El diseño está dimensionado para el tótem (1080×1920), pero funciona en cualquier resolución. Las medidas fijas del bloque de kiosco se reescalan con `clamp()` sobre `vh` en el nivel `@media (min-width: 900px) and (max-height: 1500px)` de `styles.css`: el tótem conserva exactamente sus tamaños (son los máximos de cada `clamp`) y el resto de pantallas se ajustan de forma continua.
 
 Comprobado en 1080×1920, 1366×768, 1920×1080, 1024×1366, 1280×800, 390×844 y 900×700, en modo normal y en modo silla de ruedas.
 
+> Tres trampas del CSS que ya han mordido, por si vuelven a aparecer:
+>
+> 1. **`background-size` no se hereda** de la regla que definió la imagen. La regla del fondo de madera lo fija en `220px`, así que al cambiar solo `background-image` en `.cat-nav` el degradado se recortaba a 220 px y se repetía: en el tótem salían ocho franjas horizontales.
+> 2. **`.combo-opt img`** (una clase + un elemento) gana a una clase suelta como `.choice-photo`, así que las fotos nuevas necesitan `.combo-opt` delante para no heredar los 92 px del bloque de kiosco.
+> 3. **Hay dos bloques `@media (min-width: 900px)`** que tocan el rail, y manda el segundo. Además, el bloque del botón de accesibilidad es el último del archivo y gana en *todas* las pantallas: los tamaños grandes del tótem van en un `@media` acotado por altura (`min-height: 1501px`), no ahí.
+
+---
+
 ## Impresión de tickets
 
-La web se carga desde GitHub Pages, pero la impresión se realiza localmente en el PC del kiosco.
+La web se carga desde GitHub Pages, pero la impresión se realiza localmente en el PC del kiosco:
 
-## Flujo de impresión:
+```
 Web del kiosco → print-helper.js local → impresora compartida TICKETS → Epson TM-m30II
+```
+
+Requisito en Windows: compartir la impresora con el nombre `TICKETS` (Panel de control → Dispositivos e impresoras → clic derecho → Propiedades de impresora → Compartir).
 
 ### Al cliente no le sale nunca el diálogo de Windows
 
@@ -101,7 +153,6 @@ Abre en el propio PC del kiosco **<http://localhost:5217/salud>**. Devuelve el e
 | `ultimoError` con un mensaje sobre `\\localhost\TICKETS` | El ayudante recibe el ticket pero no puede escribir en la impresora: se ha dejado de compartir, o cambió el nombre del recurso compartido. |
 
 **Navegador bloqueando la petición:** al cargarse el kiosco desde una web pública (`https://…github.io`), Chrome considera que llamar a `localhost` es una petición a la red privada y la bloquea salvo que el destino la autorice. El ayudante manda ya la cabecera `Access-Control-Allow-Private-Network: true` para permitirlo. Si aun así se bloquea, servir el kiosco desde el propio PC (`http://localhost`) elimina el problema de raíz, porque deja de haber mezcla de orígenes.
-
 
 ## Inicio automático del helper de impresión
 

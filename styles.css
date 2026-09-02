@@ -47,7 +47,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; }
 
 body {
   font-family: var(--font);
-  background: var(--black) url('./wood-bg.png');
+  background: var(--black) url('./assets/fondos/wood-bg.png');
   background-size: 220px 220px;
   color: var(--white);
   width: 100%;
@@ -80,7 +80,7 @@ a { -webkit-tap-highlight-color: transparent; }
 /* Fondo de inicio: arte real (inicio-bg.png) con mueble, mesa y remate dorado ya incluidos */
 .welcome-bg {
   position: absolute; inset: 0; z-index: 0;
-  background: #0a0a0a url('./inicio-bg.png?v=2') center center / cover no-repeat;
+  background: #0a0a0a url('./assets/fondos/inicio-bg.png?v=2') center center / cover no-repeat;
 }
 
 /* mueble y plataforma vienen dibujados en inicio-bg.png */
@@ -246,7 +246,7 @@ a { -webkit-tap-highlight-color: transparent; }
   grid-area: topbar;
   position: sticky; top: 0; z-index: 50;
   height: var(--topbar-h);
-  background: #0a0a0a url('./topbar-bg.png') center center / 100% 100% no-repeat;
+  background: #0a0a0a url('./assets/fondos/topbar-bg.png') center center / 100% 100% no-repeat;
   display: flex; align-items: center; position: relative;
 }
 .topbar-logo-hit {
@@ -447,7 +447,7 @@ a { -webkit-tap-highlight-color: transparent; }
   transition: transform .42s cubic-bezier(.2,0,.2,1);
   filter: drop-shadow(0 10px 24px rgba(0,0,0,.65));
 }
-.product-card:hover .pc-img img { transform: scale(1.13) translateY(-5px); }
+.product-card:hover .pc-img img { transform: scale(1.13) translateY(calc(var(--pc-drop, 0) * 1% - 5px)); }
 .pc-img .pc-emoji { font-size: 4rem; position: relative; z-index: 2; }
 
 /* Expositor: foto real (podium-bg.png) como fondo exacto en TODAS las categorías */
@@ -456,7 +456,7 @@ a { -webkit-tap-highlight-color: transparent; }
   height: 128px;
   margin: 6px 14px 0;
   align-items: flex-end;
-  background-image: url('./podium-bg.png');
+  background-image: url('./assets/fondos/podium-bg.png');
   background-size: 100% auto;
   background-position: top center;
   background-repeat: no-repeat;
@@ -471,6 +471,10 @@ a { -webkit-tap-highlight-color: transparent; }
 /* alto fijo (no %) para que todos los productos se vean del mismo tamaño
    pese a que cada PNG de origen trae distinto margen transparente */
 .pc-img img {
+  /* Cada foto se sube o se baja lo suyo para apoyar en la peana a la misma
+     altura que las demás (ver TRAY_OFFSET en app.js). El valor va en % de
+     su propio alto, así que vale igual en cualquier resolución. */
+  transform: translateY(calc(var(--pc-drop, 0) * 1%));
   width: auto; height: 104px;
   max-width: 96%;
   object-fit: contain; object-position: bottom center;
@@ -482,7 +486,7 @@ a { -webkit-tap-highlight-color: transparent; }
   border-radius: 14px;
   /* estrellas en la banda frontal de la peana, siempre visibles enteras */
   align-items: flex-end; padding-bottom: 5px;
-  background-image: url('./podium-bg.png');
+  background-image: url('./assets/fondos/podium-bg.png');
   background-size: 100% auto;
   background-position: bottom center;
   background-repeat: no-repeat;
@@ -1298,6 +1302,10 @@ a { -webkit-tap-highlight-color: transparent; }
   letter-spacing: .1em; color: var(--mid); margin-bottom: 10px;
 }
 .os-dining { font-weight: 700; color: var(--yellow); margin-bottom: 10px; }
+/* El numero de mesa es el dato que el cliente tiene que recordar y que el
+   camarero le va a preguntar, asi que se lee mas grande que el resto del
+   resumen y sin la frase alrededor: solo "Mesa 12". */
+.os-service { font-size: 1.5em; font-weight: 800; letter-spacing: .01em; }
 .os-items { display: flex; flex-direction: column; gap: 6px; }
 .os-line {
   display: flex; justify-content: space-between;
@@ -1444,7 +1452,7 @@ dialog[open] {
    (Sólo aplica en la pantalla táctil del kiosko 900px+; en móvil se usan los estilos base de arriba.) */
 @media (min-width:900px) {
 :root { --cabinet-red:#d40016; --cabinet-gold:#f3bd19; --cabinet-steel:#55575a; }
-.app,.main,.cat-nav { background-color:#080909; background-image:linear-gradient(90deg,rgba(0,0,0,.2),transparent 18%,rgba(0,0,0,.22)),url('./wood-bg.png'); background-size:auto,220px 220px; }
+.app,.main,.cat-nav { background-color:#080909; background-image:linear-gradient(90deg,rgba(0,0,0,.2),transparent 18%,rgba(0,0,0,.22)),url('./assets/fondos/wood-bg.png'); background-size:auto,220px 220px; }
 .daily-challenge { display:none; }
 /* La barra superior derecha se mantiene: contiene el botón de configurar la
    carpeta de tickets y el enlace de vuelta a la demo. */
@@ -1483,7 +1491,7 @@ dialog[open] {
 .fab-cart { bottom:20px; min-width:340px; padding:14px 30px; font-size:1.45rem; font-weight:800; }
 .fab-cart-icon { font-size:1.8rem; }
 .fab-cart-badge { width:40px; height:40px; font-size:1.65rem; background:#ffbd00; border:1px solid #fff07d; }
-.product-dialog,.combo-dialog,.checkout-dialog,.register-dialog { background:#242424 url('./wood-bg.png'); border:2px solid #e53a4e; box-shadow:0 0 0 4px rgba(80,0,0,.65),0 0 30px rgba(255,0,31,.75),0 20px 60px #000; }
+.product-dialog,.combo-dialog,.checkout-dialog,.register-dialog { background:#242424 url('./assets/fondos/wood-bg.png'); border:2px solid #e53a4e; box-shadow:0 0 0 4px rgba(80,0,0,.65),0 0 30px rgba(255,0,31,.75),0 20px 60px #000; }
 .quiz-wrap { max-width:920px; padding:40px 34px 118px; }
 .quiz-q-title,.qr-title { font-family:var(--font-head); letter-spacing:.02em; }
 .quiz-option { min-height:170px; background:rgba(45,45,45,.78); border-color:rgba(220,220,220,.48); }
@@ -2039,7 +2047,7 @@ body.a11y-lowered .a11y-backdrop {
   background-color: #0b0b0c;
   background-image:
     radial-gradient(ellipse at 50% 62%, rgba(204,0,0,.34), transparent 62%),
-    url('./wood-bg.png');
+    url('./assets/fondos/wood-bg.png');
   background-size: auto, 220px 220px;
   background-repeat: no-repeat, repeat;
 }
@@ -2070,6 +2078,72 @@ body.a11y-lowered .register-dialog {
   top: 50vh; top: 50dvh;
   max-height: 48vh; max-height: 48dvh;
 }
+
+/* ─── DIÁLOGOS COMPACTOS EN MODO SILLA DE RUEDAS ───
+   Aquí el diálogo vive en una banda de 48dvh, pero seguía con los tamaños
+   del tótem: foto de cabecera de 430px y opciones de 140px. Resultado, en
+   el paso de la bebida había que arrastrar 581px dentro de una ventana
+   pequeña para llegar al botón de añadir. Quien va en silla de ruedas no
+   debería tener que hacer eso justo en el modo pensado para él, así que en
+   esta banda todo baja de escala hasta que el paso cabe de una vez.
+   Todo en vh para que valga igual en el tótem que en una pantalla menor. */
+body.a11y-lowered .pd-hero,
+body.a11y-lowered .combo-hero { height: clamp(80px, 9.6vh, 195px); }
+
+body.a11y-lowered .combo-body,
+body.a11y-lowered .pd-body {
+  padding-bottom: clamp(10px, 1.4vh, 18px);
+  gap: clamp(8px, 1.1vh, 14px);
+}
+body.a11y-lowered .combo-name { font-size: clamp(1.1rem, 2.5vh, 2.5rem); }
+/* La descripción ya se ha leído en la tarjeta del producto: es lo primero
+   que sobra cuando el alto se queda a la mitad. */
+body.a11y-lowered .combo-desc { display: none; }
+
+body.a11y-lowered .combo-opt { padding: clamp(6px, 1.15vh, 16px) clamp(10px, 1.5vw, 20px); gap: clamp(6px, 1.2vw, 15px); }
+body.a11y-lowered .combo-opt img { width: clamp(34px, 3.9vh, 78px); height: clamp(34px, 3.9vh, 78px); }
+body.a11y-lowered .combo-opt-label { font-size: clamp(.8rem, 1.7vh, 1.7rem); }
+body.a11y-lowered .combo-opt-price { font-size: clamp(.68rem, 1.3vh, 1.3rem); }
+body.a11y-lowered .combo-options { gap: clamp(6px, .9vh, 12px); }
+
+body.a11y-lowered .combo-mod { padding: clamp(6px, 1.15vh, 16px) clamp(10px, 1.5vw, 22px); font-size: clamp(.78rem, 1.6vh, 1.6rem); }
+body.a11y-lowered .combo-mod-img { width: clamp(28px, 3.3vh, 66px); height: clamp(28px, 3.3vh, 66px); }
+body.a11y-lowered .combo-mods { gap: clamp(6px, .9vh, 12px); }
+
+body.a11y-lowered .combo-footer { padding-bottom: clamp(10px, 1.4vh, 20px); }
+body.a11y-lowered .combo-total-label { font-size: clamp(.75rem, 1.45vh, 1.45rem); }
+body.a11y-lowered .combo-total-price { font-size: clamp(1rem, 2.3vh, 2.3rem); }
+body.a11y-lowered .btn-add-cart { font-size: clamp(.9rem, 1.85vh, 1.85rem); padding: clamp(8px, 1.5vh, 19px); }
+body.a11y-lowered .combo-step-nav .combo-step-back { font-size: clamp(.8rem, 1.5vh, 1.5rem); padding: 0 clamp(12px, 2.2vw, 34px); }
+
+/* Teclado del número de mesa */
+body.a11y-lowered .table-num { font-size: clamp(1.6rem, 4.2vh, 4.2rem); padding: clamp(6px, 1.3vh, 18px); }
+body.a11y-lowered .keypad-key { padding: clamp(6px, 1.45vh, 21px) 0; font-size: clamp(1rem, 2.4vh, 2.4rem); }
+body.a11y-lowered .keypad { gap: clamp(5px, .8vh, 11px); }
+
+/* Pantalla de pago y resguardo */
+body.a11y-lowered .choice-content .combo-body { padding-top: clamp(12px, 1.8vh, 28px); }
+
+/* ─── RAIL COMPACTO EN MODO SILLA DE RUEDAS ───
+   Las cajas de 165px estan pensadas para un rail de 1836px; metidas en la
+   banda de 50dvh dejaban 859px de scroll y solo 5 de los 9 botones a la
+   vista, con un aspecto enorme. Aqui bajan de escala. No se busca que
+   quepan todos sin deslizar, porque para eso habria que hacerlos
+   diminutos: se busca que no desentonen en el espacio reducido. El boton
+   de accesibilidad sigue anclado y pegado al fondo, asi que se puede
+   volver al modo normal sin tener que buscarlo. */
+body.a11y-lowered .cat-nav { gap: clamp(6px, .9vh, 14px); padding-top: 8px; }
+body.a11y-lowered .cat-tab,
+body.a11y-lowered .cat-nav-ai,
+body.a11y-lowered .cat-nav-a11y {
+  min-height: clamp(60px, 6.15vh, 118px);
+  height: auto;
+  padding: clamp(6px, .8vh, 11px) 6px;
+}
+body.a11y-lowered .cat-tab { font-size: clamp(.66rem, 1.07vh, 1.07rem); }
+body.a11y-lowered .cat-tab .cat-icon,
+body.a11y-lowered .cat-nav-ai-sparkle { font-size: clamp(1.5rem, 2.8vh, 2.8rem); }
+body.a11y-lowered .cat-nav-a11y-icon { font-size: clamp(1.3rem, 2.5vh, 2.5rem); }
 
 /* Al cambiar de modo, la posición de reposo del carrito salta de arriba a
    abajo de la pantalla; sin cortar la transición, el panel cerrado hacía ese

@@ -318,13 +318,13 @@ const PRODUCT_I18N = {
    "Menús" lleva las tres piezas juntas porque es justo lo que lo distingue
    de "Hamburguesas"; con una estrella se confundía con Infantil. */
 const CATEGORIES = [
-  { id: 'burgers',  label: 'Hamburguesas', icon: '🍔', img: './burger.png' },
-  { id: 'combos',   label: 'Menús',        icon: '⭐', imgs: ['./burger.png', './iconos/ic-papas.png', './iconos/ic-cocacola.png'] },
-  { id: 'sides',    label: 'Complementos', icon: '🍟', img: './iconos/ic-papas.png' },
-  { id: 'desserts', label: 'Postres',      icon: '🥛', img: './iconos/ic-twist-oreo.png' },
-  { id: 'drinks',   label: 'Bebidas',      icon: '🥤', img: './iconos/ic-cocacola.png' },
-  { id: 'salads',   label: 'Ensaladas',    icon: '🥗', img: './ensalada.png' },
-  { id: 'kids',     label: 'Infantil',     icon: '🌟', img: './infantil.png' }
+  { id: 'burgers',  label: 'Hamburguesas', icon: '🍔', img: './assets/productos/burger.png' },
+  { id: 'combos',   label: 'Menús',        icon: '⭐', imgs: ['./assets/productos/burger.png', './assets/iconos/ic-papas.png', './assets/iconos/ic-cocacola.png'] },
+  { id: 'sides',    label: 'Complementos', icon: '🍟', img: './assets/iconos/ic-papas.png' },
+  { id: 'desserts', label: 'Postres',      icon: '🥛', img: './assets/iconos/ic-twist-oreo.png' },
+  { id: 'drinks',   label: 'Bebidas',      icon: '🥤', img: './assets/iconos/ic-cocacola.png' },
+  { id: 'salads',   label: 'Ensaladas',    icon: '🥗', img: './assets/productos/ensalada.png' },
+  { id: 'kids',     label: 'Infantil',     icon: '🌟', img: './assets/productos/infantil.png' }
 ];
 
 const MODIFIERS = [
@@ -339,10 +339,10 @@ const MODIFIERS = [
    se cobra por datáfono, por eso no se piden los datos de la tarjeta en
    pantalla. */
 const PAYMENT_METHODS = [
-  { id: 'card',    label: 'Pago con Tarjeta', img: './pay-card.png' },
-  { id: 'apple',   label: 'Apple Pay',        img: './pay-apple.png' },
-  { id: 'google',  label: 'Google Pay',       img: './pay-google.png' },
-  { id: 'cash',    label: 'Efectivo',         img: './pay-cash.png' },
+  { id: 'card',    label: 'Pago con Tarjeta', img: './assets/pago/pay-card.png' },
+  { id: 'apple',   label: 'Apple Pay',        img: './assets/pago/pay-apple.png' },
+  { id: 'google',  label: 'Google Pay',       img: './assets/pago/pay-google.png' },
+  { id: 'cash',    label: 'Efectivo',         img: './assets/pago/pay-cash.png' },
 ];
 
 // ── STRIPE CONFIG ──────────────────────────────────────────────
@@ -365,9 +365,9 @@ const QUIZ = [
     id: 'protein',
     q: '¿Qué te apetece hoy?',
     opts: [
-      { id: 'beef',    icon: '🥩', img: './iconos/ic-carne.png',   label: 'Carne a la parrilla' },
-      { id: 'chicken', icon: '🍗', img: './iconos/ic-pollo.png',   label: 'Pollo crujiente' },
-      { id: 'plant',   icon: '🌱', img: './iconos/ic-lechuga.png', label: 'Vegetal' }
+      { id: 'beef',    icon: '🥩', img: './assets/iconos/ic-carne.png',   label: 'Carne a la parrilla' },
+      { id: 'chicken', icon: '🍗', img: './assets/iconos/ic-pollo.png',   label: 'Pollo crujiente' },
+      { id: 'plant',   icon: '🌱', img: './assets/iconos/ic-lechuga.png', label: 'Vegetal' }
     ]
   },
   {
@@ -401,9 +401,9 @@ const QUIZ = [
     id: 'sweet',
     q: '¿Rematas con algo dulce?',
     opts: [
-      { id: 'shake',  icon: '🥛', img: './iconos/ic-batido.png', label: 'Batido helado' },
-      { id: 'ice',    icon: '🍦', img: './iconos/ic-helado.png', label: 'Twist Oreo' },
-      { id: 'none',   icon: '🚫', img: './iconos/ic-sin.svg',     label: 'Sin postre, gracias' }
+      { id: 'shake',  icon: '🥛', img: './assets/iconos/ic-batido.png', label: 'Batido helado' },
+      { id: 'ice',    icon: '🍦', img: './assets/iconos/ic-helado.png', label: 'Twist Oreo' },
+      { id: 'none',   icon: '🚫', img: './assets/iconos/ic-sin.svg',     label: 'Sin postre, gracias' }
     ]
   }
 ];
@@ -508,7 +508,7 @@ const LANGS = {
     burgerSolo: 'Individual', burgerCombo: 'En combo',
     burgerComboHint: '+ patatas y bebida',
     comboItemName: (n) => `Menú ${n}`,
-    orderSummaryDining: (v) => v === 'togo' ? '🥡 Para llevar' : '🍽️ Para comer aquí',
+    orderSummaryDining: (v) => v === 'togo' ? 'Para llevar' : 'Para comer aquí',
     ticketDiningHere: 'PARA TOMAR AQUÍ', ticketDiningToGo: 'PARA LLEVAR',
     serviceTitle: '¿Cómo quieres recibir tu pedido?',
     serviceSub: 'Tu pago ya está confirmado ✅',
@@ -518,9 +518,9 @@ const LANGS = {
     serviceTableHint: 'Servicio a tu mesa',
     serviceTableAsk: 'Coge un cartelito con número junto al kiosco y escribe aquí ese número',
     serviceConfirm: 'Confirmar mesa',
-    serviceConfirmHint: '🪑 Escribe el número de tu mesa',
-    summaryTable: (n) => `🪑 Te lo llevamos a la mesa ${n}`,
-    summaryPickup: '🛎️ Recógelo en el mostrador cuando salga tu número',
+    serviceConfirmHint: 'Escribe el número de tu mesa',
+    summaryTable: (n) => `Mesa ${n}`,
+    summaryPickup: 'Recógelo en el mostrador cuando salga tu número',
     ticketTable: (n) => `MESA ${n}`,
     ticketPickup: 'RECOGER EN MOSTRADOR',
   },
@@ -614,7 +614,7 @@ const LANGS = {
     burgerSolo: 'Solo', burgerCombo: 'Make it a combo',
     burgerComboHint: '+ fries & drink',
     comboItemName: (n) => `${n} Combo`,
-    orderSummaryDining: (v) => v === 'togo' ? '🥡 Takeout' : '🍽️ Dine in',
+    orderSummaryDining: (v) => v === 'togo' ? 'Takeout' : 'Dine in',
     ticketDiningHere: 'EAT IN', ticketDiningToGo: 'TAKEOUT',
     serviceTitle: 'How would you like to get your order?',
     serviceSub: 'Your payment is confirmed ✅',
@@ -624,9 +624,9 @@ const LANGS = {
     serviceTableHint: 'Table service',
     serviceTableAsk: 'Grab a numbered table marker next to the kiosk and type its number here',
     serviceConfirm: 'Confirm table',
-    serviceConfirmHint: '🪑 Type your table number',
-    summaryTable: (n) => `🪑 We'll bring it to table ${n}`,
-    summaryPickup: '🛎️ Pick it up at the counter when your number is called',
+    serviceConfirmHint: 'Type your table number',
+    summaryTable: (n) => `Table ${n}`,
+    summaryPickup: 'Pick it up at the counter when your number is called',
     ticketTable: (n) => `TABLE ${n}`,
     ticketPickup: 'COUNTER PICKUP',
   }
@@ -1089,8 +1089,55 @@ function renderProducts() {
   });
 }
 
+/* ─── APOYO DE LA FOTO EN LA BANDEJA ───
+   Cada PNG de la carta trae distinto margen transparente por debajo: del
+   5,6% de los cafés al 32,8% de los Crisscuts. Como todas se dibujan en una
+   caja del mismo alto y alineadas abajo, el producto quedaba a alturas muy
+   distintas respecto a la peana: la mayoría hundidas dentro de ella y unas
+   pocas flotando por encima.
+   Aquí va, por producto, cuánto hay que desplazar la foto para que todas
+   apoyen a la misma altura, en % de su propio alto (positivo = bajar). La
+   referencia es The Big Carl, que es la que apoyaba bien.
+   No se puede medir en caliente: las fotos vienen de carlsjr.es sin
+   cabecera CORS, así que el navegador no deja leer sus píxeles. Si se
+   cambia una foto hay que volver a medirla; lo que falte aquí sale con 0 y
+   se comporta como antes.
+   Medido leyendo el canal alfa de cada PNG. */
+const TRAY_OFFSET = {
+  'bacon-cheese-angus': -6.8,
+  'bacon-trufa': -9.6,
+  'cafe-te': -17.4,
+  'chicken-crispy-sandwich': -2.2,
+  'combo-chicken-crispy': -2.2,
+  'combo-super-star': -14.2,
+  'combo-western': -9.8,
+  'crispy-salad': 2.6,
+  'crisscuts': 9.8,
+  'famous-crispy-chicken': -6.2,
+  'famous-grilled-chicken': -6.2,
+  'famous-star': -12.8,
+  'fries': -15.8,
+  'grilled-salad': 2.6,
+  'guacamole-angus': 7,
+  'kids-burger': -16.8,
+  'kids-nuggets': -16.2,
+  'moving-mountains': -13,
+  /* La tarjeta de Sorprendeme usa su propia foto, no la del producto. */
+  'mystery-carls': -11,
+  'nuggets': -1,
+  'original-angus': -5.4,
+  'refrescos': -16,
+  'shake-chocolate': -14.6,
+  'shake-fresa': -15,
+  'shake-oreo': -15.2,
+  'super-star': -14.2,
+  'texas-angus': -4.2,
+  'twist-oreo': -1.3,
+  'western-bacon': -9.8,
+};
+
 function productCard(p) {
-  const starImg = '<img src="./estrella.png" alt="" class="pc-star" aria-hidden="true">';
+  const starImg = '<img src="./assets/marca/estrella.png" alt="" class="pc-star" aria-hidden="true">';
   const stars = starImg.repeat(p.stars)
     + (p.stars < 5 ? `<span class="pc-star-off">${starImg.repeat(5 - p.stars)}</span>` : '');
   const badgeHtml = p.badge ? `<div class="pc-badge ${p.badgeStyle || ''}">${p.badge}</div>` : '';
@@ -1102,7 +1149,7 @@ function productCard(p) {
   return `
     <article class="product-card" data-product="${p.id}" role="button" tabindex="0" aria-label="${pName(p)}, ${EUR.format(p.price)}">
       ${badgeHtml}
-      <div class="pc-img pc-cat-${p.cat}">${imgHtml}</div>
+      <div class="pc-img pc-cat-${p.cat}" style="--pc-drop:${TRAY_OFFSET[p.id] ?? 0}">${imgHtml}</div>
       <div class="pc-podium"><div class="pc-podium-stars">${stars}</div></div>
       <div class="pc-body">
         <div class="pc-name">${pName(p)}</div>
@@ -1144,14 +1191,14 @@ function openDrinkPicker(p) {
     </button>`).join('');
   const extraSec = document.createElement('div');
   extraSec.className = 'combo-section pd-variant-section';
-  extraSec.innerHTML = `<h3>${isCoffee ? '☕ ¿Qué tipo?' : '🥤 ¿Qué bebida?'} <span class="combo-required">*</span></h3><div class="combo-options">${variantHtml}</div>`;
+  extraSec.innerHTML = `<h3>${isCoffee ? '¿Qué tipo?' : '¿Qué bebida?'} <span class="combo-required">*</span></h3><div class="combo-options">${variantHtml}</div>`;
   const footer = $('pdContent').querySelector('.pd-footer');
   $('pdContent').insertBefore(extraSec, footer);
 
   const addBtn = $('btnAddCart');
   let chosenVariant = null;
   addBtn.disabled = true;
-  addBtn.textContent = isCoffee ? '☕ Elige el tipo' : '🥤 Elige la bebida';
+  addBtn.textContent = isCoffee ? 'Elige el tipo' : 'Elige la bebida';
 
   extraSec.querySelectorAll('.pick-variant').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1222,8 +1269,8 @@ function renderBurgerTypeDialog(p) {
   $('btComboIcon').innerHTML = `
     <span class="choice-stack">
       ${p.img ? foto(p.img, pName(p), 'choice-stack-main') : ''}
-      ${foto('./iconos/ic-papas.png', '', 'choice-stack-side')}
-      ${foto('./iconos/ic-cocacola.png', '', 'choice-stack-side')}
+      ${foto('./assets/iconos/ic-papas.png', '', 'choice-stack-side')}
+      ${foto('./assets/iconos/ic-cocacola.png', '', 'choice-stack-side')}
     </span>`;
 }
 
@@ -1566,9 +1613,9 @@ function openQuiz() {
 function getQuiz() {
   return [
     { id: 'protein', q: t('q1'), opts: [
-      { id: 'beef', icon: '🥩', img: './iconos/ic-carne.png', label: t('q1o1') },
-      { id: 'chicken', icon: '🍗', img: './iconos/ic-pollo.png', label: t('q1o2') },
-      { id: 'plant', icon: '🌱', img: './iconos/ic-lechuga.png', label: t('q1o3') }
+      { id: 'beef', icon: '🥩', img: './assets/iconos/ic-carne.png', label: t('q1o1') },
+      { id: 'chicken', icon: '🍗', img: './assets/iconos/ic-pollo.png', label: t('q1o2') },
+      { id: 'plant', icon: '🌱', img: './assets/iconos/ic-lechuga.png', label: t('q1o3') }
     ]},
     { id: 'hunger', q: t('q2'), opts: [
       { id: 'low', icon: '🙂', label: t('q2o1') },
@@ -1586,9 +1633,9 @@ function getQuiz() {
       { id: 'full', icon: '🎉', label: t('q4o3') }
     ]},
     { id: 'sweet', q: t('q5'), opts: [
-      { id: 'shake', icon: '🥛', img: './iconos/ic-batido.png', label: t('q5o1') },
-      { id: 'ice', icon: '🍦', img: './iconos/ic-helado.png', label: t('q5o2') },
-      { id: 'none', icon: '🚫', img: './iconos/ic-sin.svg', label: t('q5o3') }
+      { id: 'shake', icon: '🥛', img: './assets/iconos/ic-batido.png', label: t('q5o1') },
+      { id: 'ice', icon: '🍦', img: './assets/iconos/ic-helado.png', label: t('q5o2') },
+      { id: 'none', icon: '🚫', img: './assets/iconos/ic-sin.svg', label: t('q5o3') }
     ]}
   ];
 }
@@ -2397,16 +2444,16 @@ function makeCupSvg({ liq, brand, straw, name }) {
 
 /* Iconos propios recortados de las láminas gráficas de la marca */
 const CUP_IMGS = {
-  'coca-cola': './iconos/ic-cocacola.png',
-  'fanta':     './iconos/ic-fanta.png',
-  'sprite':    './iconos/ic-sprite.png',
-  'aquarius':  './iconos/ic-aquarius.png',
-  'monster':   './iconos/ic-monster.png',
-  'agua':      './iconos/ic-agua.png',
+  'coca-cola': './assets/iconos/ic-cocacola.png',
+  'fanta':     './assets/iconos/ic-fanta.png',
+  'sprite':    './assets/iconos/ic-sprite.png',
+  'aquarius':  './assets/iconos/ic-aquarius.png',
+  'monster':   './assets/iconos/ic-monster.png',
+  'agua':      './assets/iconos/ic-agua.png',
 };
 
 const DRINKS_OPTIONS = [
-  { id: 'none',       label: 'Sin bebida',       labelEn: 'No drink',        icon: '🚫', img: './iconos/ic-sin.svg', extra: 0,    retail: 0    },
+  { id: 'none',       label: 'Sin bebida',       labelEn: 'No drink',        icon: '🚫', img: './assets/iconos/ic-sin.svg', extra: 0,    retail: 0    },
   { id: 'coca-cola',  label: 'Coca-Cola',         labelEn: 'Coca-Cola',       icon: '🥤', img: CUP_IMGS['coca-cola'], extra: 0,    retail: 49 },
   { id: 'fanta',      label: 'Fanta Naranja',     labelEn: 'Fanta Orange',    icon: '🟠', img: CUP_IMGS['fanta'],     extra: 0,    retail: 49 },
   { id: 'sprite',     label: 'Sprite',            labelEn: 'Sprite',          icon: '💚', img: CUP_IMGS['sprite'],    extra: 0,    retail: 49 },
@@ -2416,35 +2463,35 @@ const DRINKS_OPTIONS = [
 ];
 
 const COFFEE_OPTIONS = [
-  { id: 'cafe-solo',    label: 'Café Solo',      labelEn: 'Espresso',      icon: '☕', img: './iconos/ic-cafe1.png' },
-  { id: 'cafe-cortado', label: 'Cortado',        labelEn: 'Cortado',       icon: '☕', img: './iconos/ic-cafe2.png' },
-  { id: 'cafe-leche',   label: 'Café con Leche', labelEn: 'Café Latte',    icon: '☕', img: './iconos/ic-cafe3.png' },
-  { id: 'te-negro',     label: 'Té Negro',       labelEn: 'Black Tea',     icon: '🍵', img: './iconos/ic-cafe4.png' },
-  { id: 'manzanilla',   label: 'Manzanilla',     labelEn: 'Chamomile Tea', icon: '🍵', img: './iconos/ic-cafe5.png' },
+  { id: 'cafe-solo',    label: 'Café Solo',      labelEn: 'Espresso',      icon: '☕', img: './assets/iconos/ic-cafe1.png' },
+  { id: 'cafe-cortado', label: 'Cortado',        labelEn: 'Cortado',       icon: '☕', img: './assets/iconos/ic-cafe2.png' },
+  { id: 'cafe-leche',   label: 'Café con Leche', labelEn: 'Café Latte',    icon: '☕', img: './assets/iconos/ic-cafe3.png' },
+  { id: 'te-negro',     label: 'Té Negro',       labelEn: 'Black Tea',     icon: '🍵', img: './assets/iconos/ic-cafe4.png' },
+  { id: 'manzanilla',   label: 'Manzanilla',     labelEn: 'Chamomile Tea', icon: '🍵', img: './assets/iconos/ic-cafe5.png' },
 ];
 
 const SIDES_OPTIONS = [
-  { id: 'none',       label: 'Sin acompañamiento', labelEn: 'No side',         icon: '🚫', img: './iconos/ic-sin.svg', extra: 0,    retail: 0    },
-  { id: 'crisscuts',  label: 'Crisscuts',          labelEn: 'Crisscuts',       icon: '🍟', img: './iconos/ic-crisscuts.png', extra: 0,    retail: 65 },
-  { id: 'fries',      label: 'Patatas Fritas',     labelEn: 'French Fries',    icon: '🍟', img: './iconos/ic-papas.png', extra: 0,    retail: 55 },
-  { id: 'nuggets',    label: 'Chicken Nuggets',    labelEn: 'Chicken Nuggets', icon: '🍗', img: './iconos/ic-nuggets.png', extra: 0,    retail: 75 },
-  { id: 'rings',      label: 'Aros de cebolla',    labelEn: 'Onion Rings',     icon: '⭕', img: './iconos/ic-aros.png', extra: 14, retail: 79 },
+  { id: 'none',       label: 'Sin acompañamiento', labelEn: 'No side',         icon: '🚫', img: './assets/iconos/ic-sin.svg', extra: 0,    retail: 0    },
+  { id: 'crisscuts',  label: 'Crisscuts',          labelEn: 'Crisscuts',       icon: '🍟', img: './assets/iconos/ic-crisscuts.png', extra: 0,    retail: 65 },
+  { id: 'fries',      label: 'Patatas Fritas',     labelEn: 'French Fries',    icon: '🍟', img: './assets/iconos/ic-papas.png', extra: 0,    retail: 55 },
+  { id: 'nuggets',    label: 'Chicken Nuggets',    labelEn: 'Chicken Nuggets', icon: '🍗', img: './assets/iconos/ic-nuggets.png', extra: 0,    retail: 75 },
+  { id: 'rings',      label: 'Aros de cebolla',    labelEn: 'Onion Rings',     icon: '⭕', img: './assets/iconos/ic-aros.png', extra: 14, retail: 79 },
 ];
 
 const DESSERT_OPTIONS = [
-  { id: 'none',        label: 'Sin postre',       labelEn: 'No dessert',       icon: '🚫', img: './iconos/ic-sin.svg', extra: 0 },
-  { id: 'twist-oreo',  label: 'Twist Oreo',       labelEn: 'Twist Oreo',       icon: '🍦', img: './iconos/ic-twist-oreo.png', extra: 65 },
-  { id: 'shake-oreo',  label: 'Shake Oreo',       labelEn: 'Oreo Shake',       icon: '🥛', img: './iconos/ic-shake-oreo.png', extra: 85 },
-  { id: 'shake-choc',  label: 'Shake Chocolate',  labelEn: 'Chocolate Shake',  icon: '🍫', img: './iconos/ic-shake-chocolate.png', extra: 85 },
+  { id: 'none',        label: 'Sin postre',       labelEn: 'No dessert',       icon: '🚫', img: './assets/iconos/ic-sin.svg', extra: 0 },
+  { id: 'twist-oreo',  label: 'Twist Oreo',       labelEn: 'Twist Oreo',       icon: '🍦', img: './assets/iconos/ic-twist-oreo.png', extra: 65 },
+  { id: 'shake-oreo',  label: 'Shake Oreo',       labelEn: 'Oreo Shake',       icon: '🥛', img: './assets/iconos/ic-shake-oreo.png', extra: 85 },
+  { id: 'shake-choc',  label: 'Shake Chocolate',  labelEn: 'Chocolate Shake',  icon: '🍫', img: './assets/iconos/ic-shake-chocolate.png', extra: 85 },
 ];
 
 /* Iconos gráficos de los modificadores (láminas de la marca) */
 const BURGER_MODS = [
-  { id: 'no-onion',     label: 'Sin cebolla',   price: 0,  img: './iconos/ic-cebolla.png' },
-  { id: 'no-tomato',    label: 'Sin tomate',    price: 0,  img: './iconos/ic-tomate.png' },
-  { id: 'no-sauce',     label: 'Sin salsa',     price: 0,  img: './iconos/ic-salsa.png' },
-  { id: 'extra-cheese', label: '+Queso',        price: 18, img: './iconos/ic-queso.png' },
-  { id: 'extra-bacon',  label: '+Bacon',        price: 25, img: './iconos/ic-bacon.png' },
+  { id: 'no-onion',     label: 'Sin cebolla',   price: 0,  img: './assets/iconos/ic-cebolla.png' },
+  { id: 'no-tomato',    label: 'Sin tomate',    price: 0,  img: './assets/iconos/ic-tomate.png' },
+  { id: 'no-sauce',     label: 'Sin salsa',     price: 0,  img: './assets/iconos/ic-salsa.png' },
+  { id: 'extra-cheese', label: '+Queso',        price: 18, img: './assets/iconos/ic-queso.png' },
+  { id: 'extra-bacon',  label: '+Bacon',        price: 25, img: './assets/iconos/ic-bacon.png' },
 ];
 
 let comboState = {};
@@ -2484,7 +2531,7 @@ function openMysteryConfigurator(product) {
         <span class="combo-total-price" id="comboTotalPrice">${EUR.format(comboTotal())}</span>
       </div>
       <button class="btn-add-cart mystery-add-btn" id="btnAddCombo" type="button" ${!comboState.drink ? 'disabled' : ''}>
-        ${comboState.drink ? `${t('mysteryAddBtn')} · ${EUR.format(comboTotal())}` : '🥤 Elige tu bebida primero'}
+        ${comboState.drink ? `${t('mysteryAddBtn')} · ${EUR.format(comboTotal())}` : 'Elige tu bebida primero'}
       </button>
     </div>
   `;
@@ -2540,9 +2587,9 @@ function openComboConfigurator(product, mode = 'combo') {
 
 function comboStepBlockMsg(stepKey) {
   if (comboState.mode === 'solo') return null; // todo opcional en modo solo
-  if (stepKey === 'drink'   && !comboState.drink)   return '🥤 Elige tu bebida primero';
-  if (stepKey === 'side'    && !comboState.side)    return '🍟 Elige tu acompañamiento';
-  if (stepKey === 'dessert' && !comboState.dessert) return '🍦 Elige el postre';
+  if (stepKey === 'drink'   && !comboState.drink)   return 'Elige tu bebida primero';
+  if (stepKey === 'side'    && !comboState.side)    return 'Elige tu acompañamiento';
+  if (stepKey === 'dessert' && !comboState.dessert) return 'Elige el postre';
   return null;
 }
 
@@ -2571,12 +2618,12 @@ function comboBlockMsg() {
   // Producto suelto: nada es obligatorio, se puede añadir sin extras.
   if (comboState.mode === 'solo') return null;
   if (comboState.product?.isMystery) {
-    if (!comboState.drink) return '🥤 Elige tu bebida primero';
+    if (!comboState.drink) return 'Elige tu bebida primero';
     return null;
   }
-  if (!comboState.drink)   return '🥤 Elige tu bebida primero';
-  if (!comboState.side)    return '🍟 Elige tu acompañamiento';
-  if (comboState.mode !== 'burgercombo' && !comboState.dessert) return '🍦 Elige el postre';
+  if (!comboState.drink)   return 'Elige tu bebida primero';
+  if (!comboState.side)    return 'Elige tu acompañamiento';
+  if (comboState.mode !== 'burgercombo' && !comboState.dessert) return 'Elige el postre';
   return null;
 }
 
@@ -2909,14 +2956,14 @@ function showToast(msg) {
   const VIDEO_FALLBACK_MS = 20_000; // máximo por vídeo por si 'ended' no llega
 
   const PLAYLIST = [
-    { type: 'video', src: './promo1.mp4' },
+    { type: 'video', src: './assets/promos/promo1.mp4' },
     /* INC-01: promo2.jpg (Godzilla vs Kong) retirada — imagen pixelada */
-    { type: 'video', src: './promo3.mp4' },
-    { type: 'photo', src: './promo4.png', ms: 3_000 },
-    { type: 'video', src: './promo5.mp4' },
-    { type: 'photo', src: './promo6.png', ms: 3_000 },
-    { type: 'video', src: './promo7.mp4' },
-    { type: 'photo', src: './promo8.png', ms: 3_000 },
+    { type: 'video', src: './assets/promos/promo3.mp4' },
+    { type: 'photo', src: './assets/promos/promo4.png', ms: 3_000 },
+    { type: 'video', src: './assets/promos/promo5.mp4' },
+    { type: 'photo', src: './assets/promos/promo6.png', ms: 3_000 },
+    { type: 'video', src: './assets/promos/promo7.mp4' },
+    { type: 'photo', src: './assets/promos/promo8.png', ms: 3_000 },
   ];
 
   let idleTimer     = null;

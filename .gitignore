@@ -1,8 +1,9 @@
 # Perfil temporal que crea abrir-kiosco.bat al lanzar Chrome
 .chrome-kiosco/
 
-# Tickets generados en pruebas locales
+# Tickets que guarda print-helper.js al imprimir
 pedido-*.txt
+tickets-impresos/
 
 # Registros del PC del kiosco (uno por maquina, no se versionan)
 inicio-kiosco.log
@@ -15,5 +16,5 @@ Thumbs.db
 # Metadatos basura de macOS del zip de referencia
 __MACOSX/
 
-# El zip de referencia va extraido en V2_ref/, no hace falta duplicarlo
+# El zip de referencia va extraido en referencias/fotos-v2/, no hace falta duplicarlo
 Kiosco Menu PNGs.zip
