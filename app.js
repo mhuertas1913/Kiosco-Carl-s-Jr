@@ -503,6 +503,9 @@ const LANGS = {
     diningHere: 'Comer aquí', diningToGo: 'Para llevar',
     diningHereShort: 'Aquí', diningToGoShort: 'Llevar',
     a11yLower: 'Bajar menú', a11yRestore: 'Subir menú',
+    /* En la portada aún no hay menú que bajar, así que se nombra el modo
+       en vez de la acción. */
+    a11yWelcome: 'Modo silla de ruedas', a11yWelcomeOn: 'Modo silla de ruedas activado',
     burgerTypeTitle: '¿Cómo la quieres?',
     burgerTypeSub: 'Puedes personalizarla en el siguiente paso',
     burgerSolo: 'Individual', burgerCombo: 'En combo',
@@ -609,6 +612,7 @@ const LANGS = {
     diningHere: 'Dine in', diningToGo: 'Takeout',
     diningHereShort: 'Dine in', diningToGoShort: 'Takeout',
     a11yLower: 'Lower menu', a11yRestore: 'Raise menu',
+    a11yWelcome: 'Wheelchair mode', a11yWelcomeOn: 'Wheelchair mode on',
     burgerTypeTitle: 'How do you want it?',
     burgerTypeSub: 'You can customize it in the next step',
     burgerSolo: 'Solo', burgerCombo: 'Make it a combo',
@@ -730,6 +734,7 @@ function init() {
   renderProducts();
   renderCart();
   bindWelcome();
+  bindWelcomeA11y();
   bindTopbar();
   bindCart();
   bindProductDialog();
@@ -799,30 +804,65 @@ function renderDiningChip() {
    (se comía el botón de pagar del checkout). */
 const a11yLowered = () => document.body.classList.contains('a11y-lowered');
 
-function bindA11yToggle() {
-  const btn = $('btnA11yMode');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    /* El carrito se abre y cierra deslizando en vertical, y al cambiar de
-       modo su posición de reposo pasa de estar por encima de la pantalla a
-       estar por debajo. Con la transición puesta, el panel cerrado hacía
-       todo ese recorrido a la vista: se veía cruzar un panel con el pedido
-       dentro y volver a esconderse. Se corta la transición mientras se
-       reordena y se devuelve en cuanto el navegador ha pintado la posición
-       nueva, para no perder la animación normal de abrir el carrito. */
-    document.body.classList.add('a11y-switching');
+/* Hay dos interruptores del mismo modo: el del rail y el de la portada.
+   Se refrescan siempre los dos, para que al empezar el pedido el rail ya
+   aparezca encendido si se activó antes de pulsar Continuar. */
+function syncA11yButtons() {
+  const on = a11yLowered();
 
-    const on = document.body.classList.toggle('a11y-lowered');
-    btn.classList.toggle('is-on', on);
-    btn.setAttribute('aria-pressed', String(on));
+  const rail = $('btnA11yMode');
+  if (rail) {
+    rail.classList.toggle('is-on', on);
+    rail.setAttribute('aria-pressed', String(on));
     const label = $('a11yLabel');
     if (label) label.textContent = on ? t('a11yRestore') : t('a11yLower');
+  }
 
-    // Dos frames: uno para que aplique la posición, otro para reactivar.
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      document.body.classList.remove('a11y-switching');
-    }));
-  });
+  const portada = $('btnA11yWelcome');
+  if (portada) {
+    portada.classList.toggle('is-on', on);
+    portada.setAttribute('aria-pressed', String(on));
+    /* Solo lleva el icono, así que el estado se cuenta en el título y en la
+       etiqueta accesible: el color ya lo dice a la vista. */
+    const texto = on ? t('a11yWelcomeOn') : t('a11yWelcome');
+    portada.setAttribute('title', texto);
+    portada.setAttribute('aria-label', texto);
+  }
+}
+
+function toggleA11y() {
+  /* El carrito se abre y cierra deslizando en vertical, y al cambiar de
+     modo su posición de reposo pasa de estar por encima de la pantalla a
+     estar por debajo. Con la transición puesta, el panel cerrado hacía
+     todo ese recorrido a la vista: se veía cruzar un panel con el pedido
+     dentro y volver a esconderse. Se corta la transición mientras se
+     reordena y se devuelve en cuanto el navegador ha pintado la posición
+     nueva, para no perder la animación normal de abrir el carrito. */
+  document.body.classList.add('a11y-switching');
+  document.body.classList.toggle('a11y-lowered');
+  syncA11yButtons();
+  // Dos frames: uno para que aplique la posición, otro para reactivar.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.body.classList.remove('a11y-switching');
+  }));
+}
+
+function bindA11yToggle() {
+  const btn = $('btnA11yMode');
+  if (btn) btn.addEventListener('click', toggleA11y);
+}
+
+/* El de la portada: mismo modo y mismo dibujo, pero con la piel de la
+   pantalla de inicio (ver .a11y-welcome en styles.css). Se puede activar
+   antes de empezar, que es justo cuando hace falta. */
+function bindWelcomeA11y() {
+  const btn = $('btnA11yWelcome');
+  if (!btn) return;
+  // Directo en el botón, sin <span> intermedio (ver comentario en kiosk.html):
+  // ese envoltorio dejaba el icono pegado a la izquierda en vez de centrado.
+  btn.innerHTML = a11yIconSvg('a11y-welcome-icon');
+  btn.addEventListener('click', toggleA11y);
+  syncA11yButtons();
 }
 
 /* ─── ENTREGA: RECOGER EN MOSTRADOR O SERVIR EN MESA ───
@@ -1031,8 +1071,8 @@ const catIconHtml = c => {
 /* Silla de ruedas dibujada en vez del emoji ♿: el emoji se ve distinto en
    cada sistema y no sigue el color del botón, que aquí cambia al activarse.
    Con currentColor el icono se enciende junto con el resto del botón. */
-const A11Y_ICON_SVG = `
-  <svg class="cat-nav-a11y-icon" viewBox="0 0 48 48" aria-hidden="true" fill="none"
+const a11yIconSvg = (clase) => `
+  <svg class="${clase}" viewBox="0 0 48 48" aria-hidden="true" fill="none"
        stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="19" cy="7.5" r="4.5" fill="currentColor" stroke="none"/>
     <path d="M18 15v10h10l5 10h7"/>
@@ -1053,7 +1093,7 @@ function renderCatNav() {
     <button class="cat-tab cat-nav-a11y ${a11yLowered() ? 'is-on' : ''}" id="btnA11yMode" type="button"
             aria-pressed="${a11yLowered()}"
             aria-label="Modo silla de ruedas: bajar el menú a la parte alcanzable de la pantalla">
-      ${A11Y_ICON_SVG}
+      ${a11yIconSvg('cat-nav-a11y-icon')}
       <span id="a11yLabel">${a11yLowered() ? t('a11yRestore') : t('a11yLower')}</span>
     </button>
   `;
@@ -2870,6 +2910,8 @@ function applyI18n() {
 function setLang(lang) {
   state.lang = lang;
   applyI18n();
+  // Los dos interruptores de accesibilidad llevan texto propio.
+  syncA11yButtons();
   renderCatNav();
   renderCart();
   renderProducts();

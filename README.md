@@ -103,6 +103,10 @@ El botón ♿ del final del rail de categorías baja toda la interfaz táctil (c
 
 El interruptor va anclado al fondo del rail y pegado (`position: sticky`) a propósito: es el único control que tiene que estar al alcance *antes* de activar el modo, así que no puede ir en la barra superior. La mitad de arriba se rellena con un telón de marca en vez de dejarse en negro.
 
+**Hay un segundo interruptor en la portada**, para poder activarlo antes de empezar el pedido. Es el mismo modo y el mismo dibujo, pero solo el icono y en la esquina inferior izquierda: con rótulo y centrado se comía la franja junto a *Continuar* al bajar la pantalla. Los dos botones comparten `toggleA11y()` y se refrescan juntos con `syncA11yButtons()`, así que si se activa en la portada la carta ya aparece bajada y el botón del rail encendido.
+
+La portada baja igual que la carta, pero **apilada en columna**: está compuesta con posiciones absolutas en porcentajes pensadas para pantalla completa y, al partirla por la mitad, los elementos de alto fijo se montaban unos sobre otros (el título acababa debajo de *Continuar*, que además se salía de la banda). Apilada no puede solaparse. El carrusel de hamburguesas se oculta en este modo: es adorno y solo quita sitio a lo que hay que tocar.
+
 **En este modo todo baja de escala** (bloque `body.a11y-lowered` al final de `styles.css`), porque los tamaños del tótem metidos en una banda de 48 % de alto obligaban a arrastrar hasta 581 px dentro de una ventana pequeña — justo en el modo pensado para no tener que estirarse. Los diálogos caben ahora enteros sin deslizar, y el rail pasa de 165 a 118 px por caja. No se busca hacerlo todo diminuto: los diálogos ocupan ~880 px de los 918 disponibles, es decir, lo más grandes que caben sin scroll.
 
 Al cambiar de modo se corta un instante la transición del carrito (`a11y-switching`, en `bindA11yToggle`): su posición de reposo salta de encima a debajo de la pantalla y, con la animación puesta, el panel cerrado cruzaba la pantalla a la vista.
@@ -118,6 +122,7 @@ Comprobado en 1080×1920, 1366×768, 1920×1080, 1024×1366, 1280×800, 390×844
 > 1. **`background-size` no se hereda** de la regla que definió la imagen. La regla del fondo de madera lo fija en `220px`, así que al cambiar solo `background-image` en `.cat-nav` el degradado se recortaba a 220 px y se repetía: en el tótem salían ocho franjas horizontales.
 > 2. **`.combo-opt img`** (una clase + un elemento) gana a una clase suelta como `.choice-photo`, así que las fotos nuevas necesitan `.combo-opt` delante para no heredar los 92 px del bloque de kiosco.
 > 3. **Hay dos bloques `@media (min-width: 900px)`** que tocan el rail, y manda el segundo. Además, el bloque del botón de accesibilidad es el último del archivo y gana en *todas* las pantallas: los tamaños grandes del tótem van en un `@media` acotado por altura (`min-height: 1501px`), no ahí.
+> 4. **Un `<span>` envolviendo un SVG con `width: 62%`** puede acabar con el icono pegado a un lado en vez de centrado. Si el span es hijo de un contenedor flex y no tiene tamaño propio, su ancho depende del contenido (el SVG al 62%), que a su vez depende del ancho del span: una referencia circular. El navegador la resuelve dándole al span el ancho disponible completo, y como el SVG (bloque, sin márgenes automáticos) no tiene por qué centrarse dentro de ese hueco, queda pegado a la izquierda. Arreglo: nada de envoltorio — el SVG como hijo directo del contenedor flex, así el porcentaje se calcula sobre un tamaño ya fijo.
 
 ---
 

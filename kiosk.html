@@ -49,6 +49,21 @@
     <button id="btnStart" class="btn-start" type="button">
       <span class="btn-start-inner" data-i18n="btnGuest">Continuar</span>
     </button>
+
+    <!-- Mismo modo que el interruptor del rail, disponible ya en la portada:
+         se puede activar antes de empezar, que es justo cuando hace falta.
+         El dibujo lo inyecta bindWelcomeA11y() para no duplicar el SVG. -->
+    <!-- Sin span intermedio a propósito: era una <span> con "width:62%",
+         y como esa anchura dependía a su vez del hueco que le dejara el
+         propio span (una cadena circular), el navegador la resolvía contra
+         el ancho disponible entero en vez de contra el tamaño del icono, y
+         el SVG quedaba pegado a la izquierda del hueco en vez de centrado.
+         Con el SVG como hijo directo del botón (que ya es flex), el
+         porcentaje se calcula sobre el tamaño fijo del botón, sin ambigüedad. -->
+    <button id="btnA11yWelcome" class="a11y-welcome" type="button" aria-pressed="false"
+            title="Modo silla de ruedas"
+            aria-label="Modo silla de ruedas: baja la pantalla a la parte alcanzable">
+    </button>
   </section>
 
   <!-- ───────────── APP PRINCIPAL ───────────── -->
