@@ -1638,14 +1638,26 @@ dialog[open] {
   .cart-empty-icon { font-size:5.5rem; }
   .cart-empty p { font-size:1.6rem; }
 
-  /* Upselling: "Completa tu pedido" y banner contextual */
-  .cart-upsell { padding:26px; border-radius:22px; }
-  .cu-title { font-size:1.7rem; margin-bottom:20px; }
-  .cu-item { padding:20px 24px; gap:20px; border-radius:18px; }
-  .cu-item img { width:84px; height:84px; }
-  .cu-item-name { font-size:1.7rem; }
-  .cu-item-price { font-size:1.4rem; }
-  .cu-item-add { font-size:2.8rem; }
+  /* Upselling: "Completa tu pedido" y banner contextual.
+     Medidas contenidas a proposito: son sugerencias, no el pedido. Con las
+     fichas mas grandes se comian 366px de los 1520 del carrito (un 24%) y
+     empujaban los articulos de verdad fuera de la vista. */
+  .cart-upsell { padding:20px; border-radius:20px; }
+  .cu-title { font-size:1.45rem; margin-bottom:14px; }
+  /* Dos columnas en vez de dos filas: las sugerencias son como mucho dos
+     (`slice(0, 2)` en renderCartUpsell), asi que puestas de lado a lado
+     ocupan la mitad de alto sin encoger nada. `flex: 1 1 0` reparte el
+     ancho a partes iguales, y si solo hay una sugerencia se queda con la
+     fila entera en vez de dejar un hueco al lado. */
+  .cu-items { flex-direction:row; gap:12px; }
+  .cu-item { flex:1 1 0; min-width:0; padding:15px 20px; gap:16px; border-radius:16px; }
+  .cu-item-body { min-width:0; }
+  .cu-item img { width:68px; height:68px; }
+  /* En media columna un nombre largo se corta con puntos suspensivos en vez
+     de partirse en dos lineas y descuadrar la altura de la fila. */
+  .cu-item-name { font-size:1.5rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cu-item-price { font-size:1.25rem; }
+  .cu-item-add { font-size:2.3rem; }
   .upsell-inner { padding:28px 34px; gap:24px; }
   .upsell-emoji { font-size:3.6rem; }
   .upsell-copy strong { font-size:1.9rem; }
@@ -2254,7 +2266,63 @@ body.a11y-switching .cart-overlay { transition: none; }
 body.a11y-lowered .cart-panel { transform: translate(50%, 130%); }
   body.a11y-lowered .cart-panel.open { transform: translate(50%, 0); }
 }
-/* La lista de artículos no debe aplastarse a 0 cuando el panel entero se
-   reduce a la banda inferior: si no cabe todo, que se desplace el panel
-   completo en vez de esconder la fila que se está editando. */
-body.a11y-lowered .cart-items { flex: 0 1 auto; min-height: 110px; }
+/* ─── CARRITO COMPACTO EN MODO SILLA DE RUEDAS ───
+   El panel pasa de 1520px a 922px, pero la cabecera, el upselling y el pie
+   conservaban su tamaño del tótem: entre los tres se comían 646px y a los
+   artículos les quedaban 110px, o sea media hamburguesa. Había que
+   arrastrar para ver lo que uno ya había pedido, que es justo lo que no
+   puede costar en el modo pensado para no estirarse.
+   Aquí las tres piezas de alrededor bajan de escala y el sitio se lo queda
+   la lista. Las sugerencias son lo primero que cede: son un extra, no el
+   pedido. Los máximos de cada clamp son el tamaño en el tótem (la pantalla
+   sigue midiendo 1920, así que el vh solo actúa en pantallas menores). */
+body.a11y-lowered .cart-items { flex: 1 1 auto; min-height: clamp(110px, 15vh, 210px); }
+
+/* Las propias líneas del pedido: con la foto de 112px y los botones de 58
+   cada artículo medía 188px, así que en la banda solo cabía uno entero por
+   mucho que se recortara lo de alrededor. Los botones de cantidad no bajan
+   de 46px: siguen siendo el objetivo táctil que hay que acertar con el
+   dedo, y por debajo de ~44px se falla. */
+body.a11y-lowered .cart-line { padding: clamp(10px, 1.4vh, 13px) 0; }
+body.a11y-lowered .cl-img,
+body.a11y-lowered .cl-emoji { width: clamp(48px, 4.6vh, 76px); height: clamp(48px, 4.6vh, 76px); }
+body.a11y-lowered .cl-name { font-size: clamp(.9rem, 1.5vh, 1.4rem); }
+body.a11y-lowered .cl-mods { font-size: clamp(.7rem, 1vh, 1rem); }
+body.a11y-lowered .cl-price { font-size: clamp(1rem, 1.8vh, 1.7rem); }
+body.a11y-lowered .cl-qty { gap: clamp(8px, 1.2vh, 14px); margin-top: clamp(6px, 1vh, 9px); }
+body.a11y-lowered .cl-qty-btn { width: 46px; height: 46px; font-size: clamp(1rem, 1.6vh, 1.35rem); }
+body.a11y-lowered .cl-qty-val { font-size: clamp(.95rem, 1.4vh, 1.4rem); }
+
+/* El aviso de "añadido" va anclado a 90px del borde inferior, que en este
+   modo cae justo encima del botón de Pagar. Se sube al telón: se lee igual
+   y no tapa la acción principal. */
+body.a11y-lowered .toast { bottom: calc(50vh + 16px); bottom: calc(50dvh + 16px); }
+
+/* El panel: 34px de relleno arriba y 40 abajo son del tótem entero. */
+body.a11y-lowered .cart-panel { padding: clamp(14px, 2vh, 20px) clamp(20px, 3vw, 56px) clamp(16px, 2vh, 22px); }
+
+/* Cabecera */
+body.a11y-lowered .cart-title { font-size: clamp(1.05rem, 1.9vh, 1.7rem); }
+body.a11y-lowered .cart-close { width: clamp(34px, 3vh, 44px); height: clamp(34px, 3vh, 44px); font-size: clamp(1rem, 1.7vh, 1.5rem); }
+body.a11y-lowered .cart-header { padding-bottom: clamp(8px, 1.2vh, 14px); }
+
+/* Sugerencias */
+body.a11y-lowered .cart-upsell { padding: clamp(9px, 1.2vh, 13px); border-radius: 16px; }
+body.a11y-lowered .cu-title { font-size: clamp(.8rem, 1.1vh, 1.15rem); margin-bottom: clamp(5px, .7vh, 9px); }
+body.a11y-lowered .cu-items { gap: clamp(5px, .6vh, 7px); }
+body.a11y-lowered .cu-item { padding: clamp(6px, .8vh, 10px) clamp(9px, 1.1vw, 14px); gap: clamp(8px, 1vw, 13px); border-radius: 12px; }
+body.a11y-lowered .cu-item img { width: clamp(32px, 2.6vh, 50px); height: clamp(32px, 2.6vh, 50px); }
+body.a11y-lowered .cu-item-name { font-size: clamp(.82rem, 1.1vh, 1.2rem); }
+body.a11y-lowered .cu-item-price { font-size: clamp(.7rem, .95vh, 1rem); }
+body.a11y-lowered .cu-item-add { font-size: clamp(1.1rem, 1.7vh, 1.8rem); }
+
+/* Pie: el botón de pagar cede lo justo, que es el que hay que acertar. */
+body.a11y-lowered .cart-footer { padding: clamp(10px, 1.4vh, 12px) clamp(16px, 2vw, 20px); gap: clamp(6px, 1vh, 8px); }
+body.a11y-lowered .ct-row { font-size: clamp(.78rem, 1.2vh, 1rem); }
+body.a11y-lowered .ct-row.total { font-size: clamp(1rem, 1.8vh, 1.45rem); }
+body.a11y-lowered .btn-checkout {
+  font-size: clamp(1rem, 1.8vh, 1.55rem);
+  padding: clamp(10px, 1.5vh, 15px);
+  margin-top: clamp(8px, 1.2vh, 9px);
+  width: min(420px, 100%);
+}
